@@ -28,53 +28,39 @@ class Indicator_SMMA
 
  public:
   virtual bool build() {
+    assert(m_avgTimes > 1);
+    assert(this->m_lstCandle.getLength() < m_avgTimes);
     this->clear();
 
-    if (m_avgTimes == 1) {
-      for (int i = 0; i < this->m_lstCandle.getLength(); ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
-        BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(SMMA_PRICE, cd.close);
-        pDat->set(SMMA_SMMA, cd.close);
-      }
-    } else if (this->m_lstCandle.getLength() < m_avgTimes) {
-      for (int i = 0; i < this->m_lstCandle.getLength(); ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
-        BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(SMMA_PRICE, cd.close);
-        pDat->set(SMMA_SMMA, -1);
-      }
-    } else {
-      BaseIndicatorDataT* pPre = NULL;
-      for (int i = 0; i < m_avgTimes; ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
-        BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(SMMA_PRICE, cd.close);
-        pDat->set(SMMA_SMMA, -1);
-        pPre = pDat;
-      }
+    BaseIndicatorDataT* pPre = NULL;
+    for (int i = 0; i < m_avgTimes; ++i) {
+      CandleDataT& cd = this->m_lstCandle.get(i);
+      BaseIndicatorDataT* pDat = this->pushNewData();
+      pDat->set(SMMA_PRICE, cd.close);
+      pDat->set(SMMA_SMMA, -1);
+      pPre = pDat;
+    }
 
-      for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
-        BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(SMMA_PRICE, cd.close);
-        if (pPre->get(SMMA_SMMA) == -1) {
-          ValueType tp = 0;
-          for (int j = 0; j < m_avgTimes; ++j) {
-            BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
-            tp += pCurDat->get(SMMA_SMMA);
-          }
-
-          pDat->set(SMMA_SMMA, tp / m_avgTimes);
-        } else {
-          BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
-          pDat->set(SMMA_SMMA, ((m_avgTimes - 1) * pPre->get(SMMA_SMMA) +
-                                pDat->get(SMMA_PRICE)) /
-                                   m_avgTimes);
+    for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
+      CandleDataT& cd = this->m_lstCandle.get(i);
+      BaseIndicatorDataT* pDat = this->pushNewData();
+      pDat->set(SMMA_PRICE, cd.close);
+      if (pPre->get(SMMA_SMMA) == -1) {
+        ValueType tp = 0;
+        for (int j = 0; j < m_avgTimes; ++j) {
+          BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
+          tp += pCurDat->get(SMMA_PRICE);
         }
 
-        pPre = pDat;
+        pDat->set(SMMA_SMMA, tp / m_avgTimes);
+      } else {
+        BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
+        pDat->set(SMMA_SMMA, ((m_avgTimes - 1) * pPre->get(SMMA_SMMA) +
+                              pDat->get(SMMA_PRICE)) /
+                                 m_avgTimes);
       }
+
+      pPre = pDat;
     }
   }
 
