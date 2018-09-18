@@ -112,6 +112,26 @@ class Indicator {
  public:
   virtual bool build() = 0;
 
+  BaseIndicatorDataT* newData() { return m_mgrIndicatorData.newData(); }
+
+  BaseIndicatorDataT* pushNewData() {
+    BaseIndicatorDataT* pDat = m_mgrIndicatorData.newData();
+    m_lst.push_back(pDat);
+    return pDat;
+  }
+
+  void deleteData(BaseIndicatorDataT* pData) {
+    m_mgrIndicatorData.deleteData(pData);
+  }
+
+  void clear() {
+    for (ListIter it = m_lst.begin(); it != m_lst.end(); ++it) {
+      deleteData(*it);
+    }
+
+    m_lst.clear();
+  }
+
  protected:
   CandleListT& m_lstCandle;
   List m_lst;
