@@ -3,6 +3,8 @@
 
 #include "indicator.h"
 
+//!! https://en.wikipedia.org/wiki/Moving_average
+
 enum INDICATOR_INDEX_WMA {
   WMA_PRICE = 0,
   WMA_TOTAL,
@@ -68,17 +70,16 @@ class Indicator_WMA
         pDat->set(WMA_TOTAL, tp);
         pDat->set(WMA_NUMERATOR, tn);
 
-        pDat->set(WMA_WMA,
-                  pDat->get(WMA_NUMERATOR) / m_denominator);
+        pDat->set(WMA_WMA, pDat->get(WMA_NUMERATOR) / m_denominator);
       } else {
-              curcache[INDICATORCACHEINDEX_WMA.TOTAL] = lastcache[INDICATORCACHEINDEX_WMA.TOTAL] + curcache[INDICATORCACHEINDEX_WMA.PRICE] - lstcache[lstcache.length - 1 - avgtimes][INDICATORCACHEINDEX_WMA.PRICE];
-    curcache[INDICATORCACHEINDEX_WMA.NUMERATOR] = lastcache[INDICATORCACHEINDEX_WMA.NUMERATOR] + avgtimes * curcache[INDICATORCACHEINDEX_WMA.PRICE] - lstcache[INDICATORCACHEINDEX_WMA.TOTAL];
-    curcache[INDICATORCACHEINDEX_WMA.DENOMINATOR] = lastcache[INDICATORCACHEINDEX_WMA.DENOMINATOR];
-
         BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
 
-        pDat->set(WMA_TOTAL, pPre->get(WMA_TOTAL) + pDat->get(WMA_PRICE) - pCurDat->get(WMA_PRICE));
-        pDat->set(WMA_NUMERATOR, pPre->get(WMA_NUMERATOR) + pDat->get(WMA_PRICE) - pCurDat->get(WMA_PRICE));
+        pDat->set(WMA_TOTAL, pPre->get(WMA_TOTAL) + pDat->get(WMA_PRICE) -
+                                 pCurDat->get(WMA_PRICE));
+        pDat->set(WMA_NUMERATOR, pPre->get(WMA_NUMERATOR) +
+                                     m_avgTimes * pDat->get(WMA_PRICE) -
+                                     pCurDat->get(WMA_NUMERATOR));
+        pDat->set(WMA_WMA, pDat->get(WMA_NUMERATOR) / m_denominator);
       }
 
       pPre = pDat;

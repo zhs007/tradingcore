@@ -3,6 +3,8 @@
 
 #include "indicator.h"
 
+//!! https://en.wikipedia.org/wiki/Moving_average
+
 enum INDICATOR_INDEX_SMA { SMA_PRICE = 0, SMA_SMA, SMA_VALUE_NUMS };
 
 template <typename TimeType, typename PriceType, typename VolumeType,
