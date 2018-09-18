@@ -132,6 +132,13 @@ class Indicator {
     m_lst.clear();
   }
 
+  BaseIndicatorDataT* getData(int index) {
+    assert(index >= 0);
+    assert(index < m_lst.size());
+
+    return m_lst[index];
+  }
+
  protected:
   CandleListT& m_lstCandle;
   List m_lst;

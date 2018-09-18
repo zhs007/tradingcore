@@ -1,78 +1,76 @@
-#ifndef __TRADINGCORE_INDICATOR_EMA_H__
-#define __TRADINGCORE_INDICATOR_EMA_H__
+#ifndef __TRADINGCORE_INDICATOR_SMMA_H__
+#define __TRADINGCORE_INDICATOR_SMMA_H__
 
 #include "indicator.h"
 
-enum INDICATOR_INDEX_EMA { EMA_PRICE = 0, EMA_EMA, EMA_VALUE_NUMS };
+enum INDICATOR_INDEX_SMMA { SMMA_PRICE = 0, SMMA_SMMA, SMMA_VALUE_NUMS };
 
 template <typename TimeType, typename PriceType, typename VolumeType,
           typename ValueType>
-class Indicator_EMA
+class Indicator_SMMA
     : public Indicator<TimeType, PriceType, VolumeType, ValueType> {
  public:
   typedef CandleData<TimeType, PriceType, VolumeType> CandleDataT;
   typedef CandleList<TimeType, PriceType, VolumeType> CandleListT;
   typedef Indicator<TimeType, PriceType, VolumeType, ValueType> IndicatorT;
-  typedef IndicatorDataMgr<ValueType, EMA_VALUE_NUMS> IndicatorDataMgrT;
+  typedef IndicatorDataMgr<ValueType, SMMA_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
 
  public:
-  Indicator_EMA(int avgtimes, CandleListT& lstCandle,
-                IndicatorDataMgrT& mgrIndicatorData)
+  Indicator_SMMA(int avgtimes, CandleListT& lstCandle,
+                 IndicatorDataMgrT& mgrIndicatorData)
       : IndicatorT(lstCandle, mgrIndicatorData), m_avgTimes(avgtimes) {
     if (m_avgTimes <= 0) {
       m_avgTimes = 1;
     }
   }
-  virtual ~Indicator_EMA() {}
+  virtual ~Indicator_SMMA() {}
 
  public:
   virtual bool build() {
     this->clear();
 
-    assert(m_avgTimes > 1);
-    assert(this->m_lstCandle.getLength() < m_avgTimes);
-
     if (m_avgTimes == 1) {
       for (int i = 0; i < this->m_lstCandle.getLength(); ++i) {
         CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(EMA_PRICE, cd.close);
-        pDat->set(EMA_EMA, cd.close);
+        pDat->set(SMMA_PRICE, cd.close);
+        pDat->set(SMMA_SMMA, cd.close);
       }
     } else if (this->m_lstCandle.getLength() < m_avgTimes) {
       for (int i = 0; i < this->m_lstCandle.getLength(); ++i) {
         CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(EMA_PRICE, cd.close);
-        pDat->set(EMA_EMA, -1);
+        pDat->set(SMMA_PRICE, cd.close);
+        pDat->set(SMMA_SMMA, -1);
       }
     } else {
       BaseIndicatorDataT* pPre = NULL;
       for (int i = 0; i < m_avgTimes; ++i) {
         CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(EMA_PRICE, cd.close);
-        pDat->set(EMA_EMA, -1);
+        pDat->set(SMMA_PRICE, cd.close);
+        pDat->set(SMMA_SMMA, -1);
         pPre = pDat;
       }
 
       for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
         CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
-        pDat->set(EMA_PRICE, cd.close);
-        if (pPre->get(EMA_EMA) == -1) {
+        pDat->set(SMMA_PRICE, cd.close);
+        if (pPre->get(SMMA_SMMA) == -1) {
           ValueType tp = 0;
           for (int j = 0; j < m_avgTimes; ++j) {
             BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
-            tp += pCurDat->get(EMA_EMA);
+            tp += pCurDat->get(SMMA_SMMA);
           }
 
-          pDat->set(EMA_EMA, tp / m_avgTimes);
+          pDat->set(SMMA_SMMA, tp / m_avgTimes);
         } else {
-          pDat->set(EMA_EMA, pPre->get(EMA_EMA) +
-                                 (pDat->get(EMA_PRICE) - pDat->get(EMA_PRICE)) *
-                                     2 / (m_avgTimes + 1));
+          BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
+          pDat->set(SMMA_SMMA, ((m_avgTimes - 1) * pPre->get(SMMA_SMMA) +
+                                pDat->get(SMMA_PRICE)) /
+                                   m_avgTimes);
         }
 
         pPre = pDat;
@@ -84,4 +82,4 @@ class Indicator_EMA
   int m_avgTimes;
 };
 
-#endif  // __TRADINGCORE_INDICATOR_EMA_H__
+#endif  // __TRADINGCORE_INDICATOR_SMMA_H__
