@@ -4,7 +4,8 @@ project(maintest VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-aux_source_directory(./test DIR_ROOT_SRCS)
+include_directories(./include)
+# aux_source_directory(./test DIR_ROOT_SRCS)
 
 add_executable(maintest ./test/test.cpp)
 

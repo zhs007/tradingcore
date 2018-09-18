@@ -1,3 +1,6 @@
+#ifndef __TRADINGCORE_CANDLE_H__
+#define __TRADINGCORE_CANDLE_H__
+
 #include <assert.h>
 #include <vector>
 
@@ -18,7 +21,7 @@ struct CandleData {
         volume(v),
         openInterest(oi) {}
 
-  bool operator<(const CandleData &cd) const { return curtime < cd.curtime; }
+  bool operator<(const CandleData& cd) const { return curtime < cd.curtime; }
 
   void format() {
     if (low > open) {
@@ -151,7 +154,13 @@ class CandleList {
     it->format();
   }
 
+  int getLength() const { return m_lst.size(); }
+
+  CandleDataT& get(int index) const { return m_lst[index]; }
+
  protected:
   TimeType m_offTime;
   List m_lst;
 };
+
+#endif // __TRADINGCORE_CANDLE_H__
