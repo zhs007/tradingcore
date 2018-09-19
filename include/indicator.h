@@ -97,11 +97,11 @@ static IndicatorDataMgr<ValueType, ValueNums>* getIndicatorDataMgr() {
   return pMgr;
 }
 
-template <typename PriceType, typename VolumeType,
+template <typename MoneyType, typename VolumeType,
           typename ValueType>
 class Indicator {
  public:
-  typedef CandleList<PriceType, VolumeType> CandleListT;
+  typedef CandleList<MoneyType, VolumeType> CandleListT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
   typedef std::vector<BaseIndicatorDataT*> List;
   typedef typename std::vector<BaseIndicatorDataT*>::iterator ListIter;

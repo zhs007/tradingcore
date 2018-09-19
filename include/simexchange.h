@@ -8,11 +8,11 @@
 
 namespace trading {
 
-template <typename PriceType, typename VolumeType>
-class SimExchange : public Exchange<PriceType, VolumeType> {
+template <typename MoneyType, typename VolumeType>
+class SimExchange : public Exchange<MoneyType, VolumeType> {
  public:
-  typedef Exchange<PriceType, VolumeType> ExchangeT;
-  typedef CandleList<PriceType, VolumeType> CandleListT;
+  typedef Exchange<MoneyType, VolumeType> ExchangeT;
+  typedef CandleList<MoneyType, VolumeType> CandleListT;
 
  public:
   SimExchange() {}
@@ -21,7 +21,7 @@ class SimExchange : public Exchange<PriceType, VolumeType> {
  public:
   bool loadCandleCSVFile(const char* filename, CSVConfig& cfg) {
     m_lstCandle.clear();
-    
+
     CSVFile csv;
     bool loadok = csv.load(filename);
     if (!loadok) {
@@ -30,7 +30,7 @@ class SimExchange : public Exchange<PriceType, VolumeType> {
 
     for (int i = 0; i < csv.getLength(); ++i) {
       time_t curtime;
-      PriceType open, close, high, low;
+      MoneyType open, close, high, low;
       VolumeType volume;
       VolumeType openInterest;
 

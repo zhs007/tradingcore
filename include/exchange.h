@@ -5,12 +5,12 @@
 
 namespace trading {
 
-template <typename PriceType, typename VolumeType>
+template <typename MoneyType, typename VolumeType>
 class Exchange {
  public:
-  typedef CategoryConfig<PriceType, VolumeType> CategoryConfigT;
-  typedef CategoryInfo<PriceType, VolumeType> CategoryInfoT;
-  typedef CategoryMgr<PriceType, VolumeType> CategoryMgrT;
+  typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
+  typedef CategoryInfo<MoneyType, VolumeType> CategoryInfoT;
+  typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
 
  public:
   Exchange() {}
@@ -18,7 +18,7 @@ class Exchange {
 
  public:
   CategoryConfigT& newCategory(const char* code, VolumeType unit,
-                               PriceType price) {
+                               MoneyType price) {
     CategoryConfigT& cfg = m_mgrCategory.newCategory(code);
 
     cfg.setUnitPrice(unit, price);

@@ -6,14 +6,14 @@
 
 namespace trading {
 
-template <typename PriceType, typename VolumeType>
+template <typename MoneyType, typename VolumeType>
 struct CandleData {
   time_t curtime;
-  PriceType open, close, high, low;
+  MoneyType open, close, high, low;
   VolumeType volume;
   VolumeType openInterest;
 
-  CandleData(time_t ct, PriceType o, PriceType c, PriceType h, PriceType l,
+  CandleData(time_t ct, MoneyType o, MoneyType c, MoneyType h, MoneyType l,
              VolumeType v, VolumeType oi)
       : curtime(ct),
         open(o),
@@ -54,10 +54,10 @@ struct CandleData {
   }
 };
 
-template <typename PriceType, typename VolumeType>
+template <typename MoneyType, typename VolumeType>
 class CandleList {
  public:
-  typedef CandleData<PriceType, VolumeType> CandleDataT;
+  typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef std::vector<CandleDataT> List;
   typedef typename std::vector<CandleDataT>::iterator ListIter;
 
@@ -68,7 +68,7 @@ class CandleList {
  public:
   void setTimeOff(time_t off) { m_offTime = off; }
 
-  void push(time_t ct, PriceType o, PriceType c, PriceType h, PriceType l,
+  void push(time_t ct, MoneyType o, MoneyType c, MoneyType h, MoneyType l,
             VolumeType v, VolumeType oi) {
     CandleDataT cd(ct, o, c, h, l, v, oi);
     m_lst.push_back(cd);

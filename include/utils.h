@@ -29,8 +29,8 @@ struct CSVConfig {
   int scaleVolume;
 };
 
-template<typename PriceType>
-PriceType str2Price(const char* str);
+// template<typename PriceType>
+// PriceType str2Price(const char* str);
 
 // template<typename PriceType = int64_t>
 // PriceType str2Price(const char* str, int scale) {

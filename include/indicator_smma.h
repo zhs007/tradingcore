@@ -9,14 +9,14 @@ namespace trading {
 
 enum INDICATOR_INDEX_SMMA { SMMA_PRICE = 0, SMMA_SMMA, SMMA_VALUE_NUMS };
 
-template <typename PriceType, typename VolumeType,
+template <typename MoneyType, typename VolumeType,
           typename ValueType>
 class Indicator_SMMA
-    : public Indicator<PriceType, VolumeType, ValueType> {
+    : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
-  typedef CandleData<PriceType, VolumeType> CandleDataT;
-  typedef CandleList<PriceType, VolumeType> CandleListT;
-  typedef Indicator<PriceType, VolumeType, ValueType> IndicatorT;
+  typedef CandleData<MoneyType, VolumeType> CandleDataT;
+  typedef CandleList<MoneyType, VolumeType> CandleListT;
+  typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, SMMA_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
 
