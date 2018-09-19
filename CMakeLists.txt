@@ -11,6 +11,8 @@ add_subdirectory(src)
 
 add_executable(maintest ./test/test.cpp)
 
+target_link_libraries(maintest libtradingcore)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

@@ -5,6 +5,8 @@
 
 //!! https://en.wikipedia.org/wiki/Moving_average
 
+namespace trading {
+
 enum INDICATOR_INDEX_WMA {
   WMA_PRICE = 0,
   WMA_TOTAL,
@@ -90,5 +92,7 @@ class Indicator_WMA
   int m_avgTimes;
   ValueType m_denominator;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_INDICATOR_WMA_H__

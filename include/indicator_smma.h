@@ -5,6 +5,8 @@
 
 //!! https://en.wikipedia.org/wiki/Moving_average#Modified_moving_average
 
+namespace trading {
+
 enum INDICATOR_INDEX_SMMA { SMMA_PRICE = 0, SMMA_SMMA, SMMA_VALUE_NUMS };
 
 template <typename TimeType, typename PriceType, typename VolumeType,
@@ -69,5 +71,7 @@ class Indicator_SMMA
  protected:
   int m_avgTimes;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_INDICATOR_SMMA_H__

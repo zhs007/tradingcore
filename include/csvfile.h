@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace trading {
+
 class CSVFile {
  public:
   typedef std::map<std::string, std::string> Row;
@@ -13,17 +15,22 @@ class CSVFile {
   typedef List::iterator ListIter;
 
  public:
-  CSVFile() : m_Width(0), m_Height(0) {}
+  CSVFile() {}
   ~CSVFile() { clear(); }
 
  public:
   bool load(const char* filename);
+
   void clear();
 
   const char* get(int y, const char* str) const;
+
+  int getLength() const { return m_lst.size(); }
+
  protected:
-  int m_Width, m_Height;
   List m_lst;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_CSVFILE_H__

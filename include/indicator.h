@@ -4,6 +4,8 @@
 #include <vector>
 #include "candle.h"
 
+namespace trading {
+
 template <typename ValueType>
 class BaseIndicatorData {
  public:
@@ -145,5 +147,7 @@ class Indicator {
   List m_lst;
   BaseIndicatorDataMgrT& m_mgrIndicatorData;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_INDICATOR_H__

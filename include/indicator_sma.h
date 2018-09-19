@@ -5,6 +5,8 @@
 
 //!! https://en.wikipedia.org/wiki/Moving_average
 
+namespace trading {
+
 enum INDICATOR_INDEX_SMA { SMA_PRICE = 0, SMA_SMA, SMA_VALUE_NUMS };
 
 template <typename TimeType, typename PriceType, typename VolumeType,
@@ -70,5 +72,7 @@ class Indicator_SMA
  protected:
   int m_avgTimes;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_INDICATOR_SMA_H__

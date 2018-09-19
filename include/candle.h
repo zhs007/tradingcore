@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <vector>
 
+namespace trading {
+
 template <typename TimeType, typename PriceType, typename VolumeType>
 struct CandleData {
   TimeType curtime;
@@ -65,11 +67,14 @@ class CandleList {
 
  public:
   void setTimeOff(TimeType off) { m_offTime = off; }
+
   void push(TimeType ct, PriceType o, PriceType c, PriceType h, PriceType l,
             VolumeType v, VolumeType oi) {
     CandleDataT cd(ct, o, c, h, l, v, oi);
     m_lst.push_back(cd);
   }
+
+  void push(CandleDataT& cd) { m_lst.push_back(cd); }
 
   bool format() {
     if (m_lst.size() < 2) {
@@ -158,9 +163,13 @@ class CandleList {
 
   CandleDataT& get(int index) const { return m_lst[index]; }
 
+  void clear() { m_lst.clear(); }
+
  protected:
   TimeType m_offTime;
   List m_lst;
 };
 
-#endif // __TRADINGCORE_CANDLE_H__
+}  // namespace trading
+
+#endif  // __TRADINGCORE_CANDLE_H__

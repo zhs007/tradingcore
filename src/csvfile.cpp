@@ -2,6 +2,8 @@
 #include <fstream>
 #include <streambuf>
 
+namespace trading {
+
 bool isWrap(std::string& str, int index, int& off) {
   if (str[index] == '\r' && index + 1 < str.length() &&
       str[index + 1] == '\n') {
@@ -39,6 +41,14 @@ bool CSVFile::load(const char* filename) {
 
     if (!headend) {
       if (isWrap(str, i, off)) {
+        if (curstart == i) {
+          std::string curstr = "__" + std::to_string(lsthead.size());
+          lsthead.push_back(curstr);
+        } else {
+          std::string curstr = str.substr(curstart, i - curstart);
+          lsthead.push_back(curstr);
+        }
+
         headend = true;
         curstart = i + off;
       } else if (isSeparate(str, i)) {
@@ -46,7 +56,7 @@ bool CSVFile::load(const char* filename) {
           std::string curstr = "__" + std::to_string(lsthead.size());
           lsthead.push_back(curstr);
         } else {
-          std::string curstr = str.substr(curstart, i - curstart - 1);
+          std::string curstr = str.substr(curstart, i - curstart);
           lsthead.push_back(curstr);
         }
 
@@ -54,6 +64,13 @@ bool CSVFile::load(const char* filename) {
       }
     } else {
       if (isWrap(str, i, off)) {
+        if (curstart == i) {
+          lstrow.push_back("");
+        } else {
+          std::string curstr = str.substr(curstart, i - curstart);
+          lstrow.push_back(curstr);
+        }
+
         Row* pRow = new Row();
         for (int i = 0; i < lsthead.size(); ++i) {
           if (i < lstrow.size()) {
@@ -71,7 +88,7 @@ bool CSVFile::load(const char* filename) {
         if (curstart == i) {
           lstrow.push_back("");
         } else {
-          std::string curstr = str.substr(curstart, i - curstart - 1);
+          std::string curstr = str.substr(curstart, i - curstart);
           lstrow.push_back(curstr);
         }
 
@@ -96,3 +113,5 @@ const char* CSVFile::get(int y, const char* str) const {
 
   return (*m_lst[y])[str].c_str();
 }
+
+}  // namespace trading

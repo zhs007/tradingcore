@@ -5,6 +5,8 @@
 
 //!! https://en.wikipedia.org/wiki/Relative_strength_index
 
+namespace trading {
+
 enum INDICATOR_INDEX_RSI {
   RSI_PRICE = 0,
   RSI_CUR_U,
@@ -139,5 +141,7 @@ class Indicator_RSI
  protected:
   int m_avgTimes;
 };
+
+}  // namespace trading
 
 #endif  // __TRADINGCORE_INDICATOR_RSI_H__
