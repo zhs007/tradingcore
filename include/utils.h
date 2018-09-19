@@ -29,6 +29,9 @@ struct CSVConfig {
   int scaleVolume;
 };
 
+typedef int64_t TradeID;
+typedef int64_t OrderID;
+
 // template<typename PriceType>
 // PriceType str2Price(const char* str);
 
