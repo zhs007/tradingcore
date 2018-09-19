@@ -26,9 +26,11 @@ class Wallet {
 
   void setMoney(MoneyType money) { m_money = money; }
 
-  void initCategoryInfo(const char* code, VolumeType vol, MoneyType avgPrice) {
+  void initCategoryInfo(const char* name, const char* code, VolumeType vol,
+                        MoneyType avgPrice) {
     CategoryPair p;
-    p.first = code;
+    p.first = name;
+    p.second.code = code;
     p.second.vol = vol;
     p.second.avgPrice = avgPrice;
 
@@ -37,14 +39,16 @@ class Wallet {
 
   void chgMoney(MoneyType off) { m_money += off; }
 
-  void chgCategoryVolume(const char* code, MoneyType curprice, VolumeType off) {
-    if (m_mapCategory.has(code)) {
-      const CategoryConfigT* pCfg = m_mgr.getConfig(code);
+  void chgCategoryVolume(const char* name, MoneyType curprice, VolumeType off) {
+    if (m_mapCategory.has(name)) {
+      CategoryInfoT& ci = m_mapCategory[name];
+
+      const CategoryConfigT* pCfg = m_mgr.getConfig(ci.code.c_str());
       if (pCfg == NULL) {
         return;
       }
 
-      m_mapCategory[code].chgVolume(*pCfg, curprice, off);
+      ci.chgVolume(*pCfg, curprice, off);
     }
   }
 

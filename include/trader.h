@@ -8,10 +8,21 @@
 namespace trading {
 
 template <typename MoneyType, typename VolumeType>
-class Trader {
- public:
+struct TraderExchangeInfo {
   typedef Wallet<MoneyType, VolumeType> WalletT;
   typedef Exchange<MoneyType, VolumeType> ExchangeT;
+
+  WalletT wallet;
+  ExchangeT& exchange;
+
+  TraderExchangeInfo(ExchangeT& e) : exchange(e) {}
+};
+
+template <typename MoneyType, typename VolumeType>
+class Trader {
+ public:
+  typedef TraderExchangeInfo<MoneyType, VolumeType> TraderExchangeInfoT;
+  typedef std::map<std::string, TraderExchangeInfoT> ExchangeMap;
 
  public:
   Trader() {}
@@ -19,7 +30,7 @@ class Trader {
 
  public:
  protected:
-  WalletT m_wallet;
+  ExchangeMap m_map;
 };
 
 }  // namespace trading

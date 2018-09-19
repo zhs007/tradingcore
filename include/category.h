@@ -103,6 +103,7 @@ template <typename MoneyType, typename VolumeType>
 struct CategoryInfo {
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
 
+  std::string code;
   VolumeType vol;
   MoneyType avgPrice;
 
@@ -168,12 +169,12 @@ class CategoryMgr {
   }
 
   CategoryConfigT& newCategory(const char* code) {
-      CategoryConfigPair p;
-      p.first = code;
+    CategoryConfigPair p;
+    p.first = code;
 
-      m_map.insert(p);
+    m_map.insert(p);
 
-      return m_map[code];
+    return m_map[code];
   }
 
  protected:
