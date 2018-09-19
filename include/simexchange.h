@@ -9,14 +9,21 @@
 namespace trading {
 
 template <typename MoneyType, typename VolumeType>
-class SimExchange : public Exchange<MoneyType, VolumeType> {
+class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
  public:
-  typedef Exchange<MoneyType, VolumeType> ExchangeT;
+  typedef ExchangeCategory<MoneyType, VolumeType> ExchangeCategoryT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
+  typedef Wallet<MoneyType, VolumeType> WalletT;
+  typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
 
  public:
-  SimExchange() {}
-  ~SimExchange() {}
+  SimExchangeCategory() {}
+  virtual ~SimExchangeCategory() {}
+
+ public:
+  virtual void onTick(time_t ct, WalletT& wallet, CategoryConfigT& cfg) {
+
+  }
 
  public:
   bool loadCandleCSVFile(const char* filename, CSVConfig& cfg) {
@@ -76,6 +83,19 @@ class SimExchange : public Exchange<MoneyType, VolumeType> {
 
  protected:
   CandleListT m_lstCandle;
+};
+
+template <typename MoneyType, typename VolumeType>
+class SimExchange : public Exchange<MoneyType, VolumeType> {
+ public:
+  typedef Exchange<MoneyType, VolumeType> ExchangeT;
+
+ public:
+  SimExchange() {}
+  ~SimExchange() {}
+
+ public:
+ protected:
 };
 
 }  // namespace trading
