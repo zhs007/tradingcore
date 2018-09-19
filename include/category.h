@@ -27,6 +27,15 @@ struct CategoryConfig {
   MoneyType feeMax;
   MoneyType feeMin;
 
+  CategoryConfig() {
+    unit = 0;
+    price = 0;
+
+    perDeposit = 0;
+
+    setFee(FEE_FREE);
+  }
+
   MoneyType countValue(VolumeType vol) const {
     return std::abs(vol * price / unit);
   }
@@ -133,6 +142,7 @@ template <typename MoneyType, typename VolumeType>
 class CategoryMgr {
  public:
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
+  typedef std::pair<std::string, CategoryConfigT> CategoryConfigPair;
   typedef std::map<std::string, CategoryConfigT> CategoryConfigMap;
 
  public:
@@ -155,6 +165,15 @@ class CategoryMgr {
     }
 
     return NULL;
+  }
+
+  CategoryConfigT& newCategory(const char* code) {
+      CategoryConfigPair p;
+      p.first = code;
+
+      m_map.insert(p);
+
+      return m_map[code];
   }
 
  protected:
