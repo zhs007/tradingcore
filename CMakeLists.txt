@@ -7,6 +7,8 @@ enable_testing()
 include_directories(./include)
 # aux_source_directory(./test DIR_ROOT_SRCS)
 
+add_subdirectory(src)
+
 add_executable(maintest ./test/test.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

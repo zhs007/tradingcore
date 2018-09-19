@@ -60,27 +60,28 @@ class BaseIndicatorDataMgr {
 template <typename ValueType, int ValueNums>
 class IndicatorDataMgr : public BaseIndicatorDataMgr<ValueType> {
  public:
+  typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
   typedef IndicatorData<ValueType, ValueNums> IndicatorDataT;
-  typedef std::vector<IndicatorDataT*> List;
+  typedef std::vector<BaseIndicatorDataT*> List;
 
  public:
   IndicatorDataMgr() : m_cacheNums(128) {}
   ~IndicatorDataMgr() {}
 
  public:
-  IndicatorDataT* newData() {
+  BaseIndicatorDataT* newData() {
     if (m_lst.empty()) {
       for (int i = 0; i < m_cacheNums; ++i) {
         m_lst.push_back(new IndicatorDataT());
       }
     }
 
-    IndicatorDataT* pData = m_lst.back();
+    IndicatorDataT* pData = (IndicatorDataT*)m_lst.back();
     m_lst.pop_back();
     return pData;
   }
 
-  void deleteData(IndicatorDataT* data) { m_lst.push_back(data); }
+  void deleteData(BaseIndicatorDataT* data) { m_lst.push_back(data); }
 
  protected:
   int m_cacheNums;
@@ -89,8 +90,8 @@ class IndicatorDataMgr : public BaseIndicatorDataMgr<ValueType> {
 
 template <typename ValueType, int ValueNums>
 static IndicatorDataMgr<ValueType, ValueNums>* getIndicatorDataMgr() {
-  static IndicatorDataMgr<ValueType, ValueNums>* pMgr =
-      new IndicatorDataMgr<ValueType, ValueNums>();
+  typedef IndicatorDataMgr<ValueType, ValueNums> IndicatorDataMgrT;
+  static IndicatorDataMgrT* pMgr = new IndicatorDataMgrT();
   return pMgr;
 }
 
