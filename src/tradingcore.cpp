@@ -1,5 +1,8 @@
 #include "../include/tradingcore.h"
 #include <time.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 
 namespace trading {
 
@@ -56,6 +59,54 @@ bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
 
     lstCandle.push(curtime, open, close, high, low, volume, openInterest);
   }
+
+  return true;
+}
+
+bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
+                  CSVConfig& cfg) {
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out | std::ios::trunc);
+
+  outfile << cfg.head.curtime << ",";
+  outfile << cfg.head.open << ",";
+  outfile << cfg.head.close << ",";
+  outfile << cfg.head.high << ",";
+  outfile << cfg.head.low << ",";
+  outfile << cfg.head.volume << ",";
+  outfile << cfg.head.openInterest << std::endl;
+
+  for (int i = 0; i < lstCandle.getLength(); ++i) {
+    const CandleDataInt64& cd = lstCandle.get(i);
+    time_t ct = cd.curtime;
+
+    if (cfg.timeType == CSVTIME_FORMAT_STR) {
+      tm* curtm = localtime(&ct);
+      char buf[128];
+      strftime(buf, 128, "%Y-%m-%d %H:%M:%S", curtm);
+      outfile << buf << ",";
+    } else if (cfg.timeType == CSVTIME_TIMESTAMP) {
+      outfile << ct << ",";
+    }
+
+    double open = cd.open / cfg.scalePrice;
+    double close = cd.close / cfg.scalePrice;
+    double high = cd.high / cfg.scalePrice;
+    double low = cd.low / cfg.scalePrice;
+
+    outfile << std::fixed << std::setprecision(2) << open << ",";
+    outfile << std::fixed << std::setprecision(2) << close << ",";
+    outfile << std::fixed << std::setprecision(2) << high << ",";
+    outfile << std::fixed << std::setprecision(2) << low << ",";
+
+    double vol = cd.volume / cfg.scaleVolume;
+    double oi = cd.openInterest / cfg.scaleVolume;
+
+    outfile << std::fixed << std::setprecision(2) << vol << ",";
+    outfile << std::fixed << std::setprecision(2) << oi << std::endl;
+  }
+
+  outfile.close();
 
   return true;
 }

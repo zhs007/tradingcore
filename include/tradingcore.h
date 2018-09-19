@@ -37,6 +37,9 @@ struct CSVConfig {
 bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
                   CSVConfig& cfg);
 
+bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
+                  CSVConfig& cfg);
+
 }  // namespace trading
 
 #endif  // __TRADINGCORE_TRADINGCORE_H__

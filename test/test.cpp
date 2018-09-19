@@ -32,10 +32,16 @@ void testLoadCSV(const char* filename) {
     }
 
     printf("%s has %d rows", filename, lstCandle.getLength());
+
+    lstCandle.format();
+
+    printf("%s has %d rows", filename, lstCandle.getLength());
+
+    trading::saveCSVInt64(lstCandle, "output.csv", cfg);
 }
 
 int main() {
-  testLoadCSV("samplecsv/TA601.csv");
+  testLoadCSV("samplecsv/noformat.csv");
 
   return 0;
 }

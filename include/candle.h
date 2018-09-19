@@ -83,12 +83,12 @@ class CandleList {
     std::sort(m_lst.begin(), m_lst.end());
     TimeType bt = formatTime(m_lst[0].curtime);
     TimeType et = formatTime(m_lst[m_lst.size() - 1].curtime);
-    if (bt <= et) {
+    if (bt >= et) {
       return false;
     }
 
     TimeType ct = bt;
-    ListIter preit = NULL;
+    ListIter preit = m_lst.end();
     for (ListIter it = m_lst.begin(); it != m_lst.end(); ++it) {
       TimeType cnt = formatTime(it->curtime);
       if (cnt != it->curtime) {
@@ -96,7 +96,7 @@ class CandleList {
       }
 
       if (cnt > ct) {
-        assert(preit != NULL);
+        assert(preit != m_lst.end());
         do {
           CandleDataT cd(ct, preit->close, preit->close, preit->close,
                          preit->close, 0, preit->openInterest);
@@ -105,7 +105,7 @@ class CandleList {
           ct += m_offTime;
         } while (ct < cnt);
       } else if (cnt < ct) {
-        assert(preit != NULL);
+        assert(preit != m_lst.end());
         CandleDataT cd(ct, preit->close, it->close, it->high, it->low,
                        it->volume, it->openInterest);
 
@@ -138,6 +138,8 @@ class CandleList {
         } else {
           it = m_lst.insert(it, cd);
         }
+      } else {
+        ct += m_offTime;
       }
 
       formatCandle(preit, it);
@@ -150,7 +152,7 @@ class CandleList {
   TimeType formatTime(TimeType ct) { return ct - (ct % m_offTime); }
 
   void formatCandle(ListIter preit, ListIter it) {
-    if (preit != NULL) {
+    if (preit != m_lst.end()) {
       if (it->open != preit->close) {
         it->open = preit->close;
       }
@@ -161,7 +163,7 @@ class CandleList {
 
   int getLength() const { return m_lst.size(); }
 
-  CandleDataT& get(int index) const { return m_lst[index]; }
+  const CandleDataT& get(int index) const { return m_lst[index]; }
 
   void clear() { m_lst.clear(); }
 
