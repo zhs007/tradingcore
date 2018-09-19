@@ -20,6 +20,7 @@ class CSVFile {
   bool load(const char* filename);
   void clear();
 
+  const char* get(int y, const char* str) const;
  protected:
   int m_Width, m_Height;
   List m_lst;
