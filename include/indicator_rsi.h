@@ -17,14 +17,14 @@ enum INDICATOR_INDEX_RSI {
   RSI_VALUE_NUMS
 };
 
-template <typename TimeType, typename PriceType, typename VolumeType,
+template <typename PriceType, typename VolumeType,
           typename ValueType>
 class Indicator_RSI
-    : public Indicator<TimeType, PriceType, VolumeType, ValueType> {
+    : public Indicator<PriceType, VolumeType, ValueType> {
  public:
-  typedef CandleData<TimeType, PriceType, VolumeType> CandleDataT;
-  typedef CandleList<TimeType, PriceType, VolumeType> CandleListT;
-  typedef Indicator<TimeType, PriceType, VolumeType, ValueType> IndicatorT;
+  typedef CandleData<PriceType, VolumeType> CandleDataT;
+  typedef CandleList<PriceType, VolumeType> CandleListT;
+  typedef Indicator<PriceType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, RSI_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
 

@@ -7,8 +7,8 @@
 
 namespace trading {
 
-typedef CandleData<int64_t, int64_t, int64_t> CandleDataInt64;
-typedef CandleList<int64_t, int64_t, int64_t> CandleListInt64;
+typedef CandleData<int64_t, int64_t> CandleDataInt64;
+typedef CandleList<int64_t, int64_t> CandleListInt64;
 
 struct CSVHead {
   std::string curtime;

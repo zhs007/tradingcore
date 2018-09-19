@@ -6,14 +6,14 @@
 
 namespace trading {
 
-template <typename TimeType, typename PriceType, typename VolumeType>
+template <typename PriceType, typename VolumeType>
 struct CandleData {
-  TimeType curtime;
+  time_t curtime;
   PriceType open, close, high, low;
   VolumeType volume;
   VolumeType openInterest;
 
-  CandleData(TimeType ct, PriceType o, PriceType c, PriceType h, PriceType l,
+  CandleData(time_t ct, PriceType o, PriceType c, PriceType h, PriceType l,
              VolumeType v, VolumeType oi)
       : curtime(ct),
         open(o),
@@ -54,10 +54,10 @@ struct CandleData {
   }
 };
 
-template <typename TimeType, typename PriceType, typename VolumeType>
+template <typename PriceType, typename VolumeType>
 class CandleList {
  public:
-  typedef CandleData<TimeType, PriceType, VolumeType> CandleDataT;
+  typedef CandleData<PriceType, VolumeType> CandleDataT;
   typedef std::vector<CandleDataT> List;
   typedef typename std::vector<CandleDataT>::iterator ListIter;
 
@@ -66,9 +66,9 @@ class CandleList {
   ~CandleList() {}
 
  public:
-  void setTimeOff(TimeType off) { m_offTime = off; }
+  void setTimeOff(time_t off) { m_offTime = off; }
 
-  void push(TimeType ct, PriceType o, PriceType c, PriceType h, PriceType l,
+  void push(time_t ct, PriceType o, PriceType c, PriceType h, PriceType l,
             VolumeType v, VolumeType oi) {
     CandleDataT cd(ct, o, c, h, l, v, oi);
     m_lst.push_back(cd);
@@ -81,16 +81,16 @@ class CandleList {
       return true;
     }
     std::sort(m_lst.begin(), m_lst.end());
-    TimeType bt = formatTime(m_lst[0].curtime);
-    TimeType et = formatTime(m_lst[m_lst.size() - 1].curtime);
+    time_t bt = formatTime(m_lst[0].curtime);
+    time_t et = formatTime(m_lst[m_lst.size() - 1].curtime);
     if (bt >= et) {
       return false;
     }
 
-    TimeType ct = bt;
+    time_t ct = bt;
     ListIter preit = m_lst.end();
     for (ListIter it = m_lst.begin(); it != m_lst.end(); ++it) {
-      TimeType cnt = formatTime(it->curtime);
+      time_t cnt = formatTime(it->curtime);
       if (cnt != it->curtime) {
         it->curtime = cnt;
       }
@@ -149,7 +149,7 @@ class CandleList {
     return true;
   }
 
-  TimeType formatTime(TimeType ct) { return ct - (ct % m_offTime); }
+  time_t formatTime(time_t ct) { return ct - (ct % m_offTime); }
 
   void formatCandle(ListIter preit, ListIter it) {
     if (preit != m_lst.end()) {
@@ -168,7 +168,7 @@ class CandleList {
   void clear() { m_lst.clear(); }
 
  protected:
-  TimeType m_offTime;
+  time_t m_offTime;
   List m_lst;
 };
 
