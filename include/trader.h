@@ -2,11 +2,25 @@
 #define __TRADINGCORE_TRADER_H__
 
 #include <string>
+#include "exchange.h"
+#include "wallet.h"
 
 namespace trading {
 
 template <typename MoneyType, typename VolumeType>
-class Trader {};
+class Trader {
+ public:
+  typedef Wallet<MoneyType, VolumeType> WalletT;
+  typedef Exchange<MoneyType, VolumeType> ExchangeT;
+
+ public:
+  Trader() {}
+  ~Trader() {}
+
+ public:
+ protected:
+  WalletT m_wallet;
+};
 
 }  // namespace trading
 
