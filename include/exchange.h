@@ -4,6 +4,7 @@
 #include <vector>
 #include "category.h"
 #include "order.h"
+#include "ordermgr.h"
 #include "trade.h"
 #include "trademgr.h"
 #include "wallet.h"
@@ -16,6 +17,7 @@ class ExchangeCategory {
   typedef Wallet<MoneyType, VolumeType> WalletT;
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
   typedef Order<MoneyType, VolumeType> OrderT;
+  typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
   typedef std::vector<OrderT*> OrderList;
   typedef typename OrderList::iterator OrderListIter;
   typedef Trade<MoneyType, VolumeType> TradeT;
@@ -25,61 +27,105 @@ class ExchangeCategory {
   ExchangeCategory(const char* name, CategoryConfigT& cfg)
       : m_nameCategory(name),
         m_mgrTrade(*(getTradeMgr<MoneyType, VolumeType>())),
-        m_cfgCategory(cfg) {}
+        m_cfgCategory(cfg),
+        m_mgrOrder(*(getOrderMgr<MoneyType, VolumeType>())) {}
   virtual ~ExchangeCategory() {}
 
  public:
-  virtual void onTick(time_t ct, WalletT& wallet) = 0;
+  virtual void onTick(WalletT& wallet, time_t bt, time_t ct) = 0;
+
+  virtual void onNewOrder(OrderT& order, time_t ct) {
+    if (order.orderSide == ORDER_BUY) {
+      _procBuyOrder(order, ct);
+      if (order.curVolume > 0) {
+        _insBuyOrder(order);
+      }
+
+    } else {
+      _procSellOrder(order, ct);
+      if (order.curVolume > 0) {
+        _insBuyOrder(order);
+      }
+    }
+  }
 
  public:
   const char* getName() const { return m_nameCategory.c_str(); }
 
-  void pushOrder(OrderT* pOrder, time_t ct) {
-    if (pOrder->orderSide == ORDER_BUY) {
-      _insBuyOrder(pOrder);
+  void newOrder(OrderT& order, time_t ct) { onNewOrder(order, ct); }
+
+  // do not in foreach iterator!!!
+  void _deleteOrder(OrderID orderID, ORDER_SIDE side) {
+    if (side == ORDER_BUY) {
+      for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();
+           ++it) {
+        if (orderID == (*it)->orderID) {
+          m_lstOrderBuy.erase(it);
+
+          return;
+        }
+      }
     } else {
-      _insSellOrder(pOrder);
+      for (OrderListIter it = m_lstOrderSell.begin();
+           it != m_lstOrderSell.end(); ++it) {
+        if (orderID == (*it)->orderID) {
+          m_lstOrderSell.erase(it);
+
+          return;
+        }
+      }
     }
   }
+  // void pushOrder(OrderT* pOrder, time_t ct) {
+  //   if (pOrder->orderSide == ORDER_BUY) {
+  //     _insBuyOrder(pOrder);
+  //   } else {
+  //     _insSellOrder(pOrder);
+  //   }
+  // }
 
  protected:
-  void _insBuyOrder(OrderT* pOrder) {
-    assert(pOrder->orderSide == ORDER_BUY);
+  // void _deleteOrder(OrderT& order) {
+  //   m_mgrOrder.deleteOrder(&order);
+  // }
+
+  void _insBuyOrder(OrderT& order) {
+    assert(order.orderSide == ORDER_BUY);
 
     for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();
          ++it) {
-      if (pOrder->destPrice > (*it)->destPrice) {
-        m_lstOrderBuy.insert(pOrder);
+      if (order.destPrice > (*it)->destPrice) {
+        m_lstOrderBuy.insert(&order);
 
         return;
       }
     }
 
-    m_lstOrderBuy.push_back(pOrder);
+    m_lstOrderBuy.push_back(&order);
   }
 
-  void _insSellOrder(OrderT* pOrder) {
-    assert(pOrder->orderSide == ORDER_SELL);
+  void _insSellOrder(OrderT& order) {
+    assert(order.orderSide == ORDER_SELL);
 
     for (OrderListIter it = m_lstOrderSell.begin(); it != m_lstOrderSell.end();
          ++it) {
-      if (pOrder->destPrice < (*it)->destPrice) {
-        m_lstOrderSell.insert(pOrder);
+      if (order.destPrice < (*it)->destPrice) {
+        m_lstOrderSell.insert(&order);
 
         return;
       }
     }
 
-    m_lstOrderSell.push_back(pOrder);
+    m_lstOrderSell.push_back(&order);
   }
 
-  void _procBuyOrder(OrderT* pOrder, time_t ct) {
-    assert(pOrder->orderSide == ORDER_BUY);
+  void _procBuyOrder(OrderT& order, time_t ct) {
+    assert(order.orderSide == ORDER_BUY);
 
     for (OrderListIter it = m_lstOrderSell.begin();
          it != m_lstOrderSell.end();) {
-      if (pOrder->destPrice >= (*it)->destPrice) {
-        _procTransaction(pOrder, *it, ct);
+      if (order.destPrice >= (*it)->destPrice) {
+        _procTransaction(order, *it, ct);
 
         if ((*it)->curVolume <= 0) {
           it = m_lstOrderSell.erase(it);
@@ -87,7 +133,7 @@ class ExchangeCategory {
           ++it;
         }
 
-        if (pOrder->curVolume <= 0) {
+        if (order.curVolume <= 0) {
           return;
         }
       } else {
@@ -96,12 +142,12 @@ class ExchangeCategory {
     }
   }
 
-  void _procSellOrder(OrderT* pOrder, time_t ct) {
-    assert(pOrder->orderSide == ORDER_SELL);
+  void _procSellOrder(OrderT& order, time_t ct) {
+    assert(order.orderSide == ORDER_SELL);
 
     for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();) {
-      if (pOrder->destPrice <= (*it)->destPrice) {
-        _procTransaction(pOrder, *it, ct);
+      if (order.destPrice <= (*it)->destPrice) {
+        _procTransaction(order, *it, ct);
 
         if ((*it)->curVolume <= 0) {
           it = m_lstOrderBuy.erase(it);
@@ -109,7 +155,7 @@ class ExchangeCategory {
           ++it;
         }
 
-        if (pOrder->curVolume <= 0) {
+        if (order.curVolume <= 0) {
           return;
         }
       } else {
@@ -118,34 +164,34 @@ class ExchangeCategory {
     }
   }
 
-  void _procTransaction(OrderT* pSrc, OrderT* pDest, time_t ct) {
-    assert(pSrc->orderSide != pDest->orderSide);
-    assert(pSrc->curVolume > 0);
-    assert(pDest->curVolume > 0);
+  void _procTransaction(OrderT& src, OrderT& dest, time_t ct) {
+    assert(src.orderSide != dest.orderSide);
+    assert(src.curVolume > 0);
+    assert(dest.curVolume > 0);
 
     TradeT& trade = _newTrade();
 
     // use dest price
-    trade.price = pDest->destPrice;
+    trade.price = dest.destPrice;
 
     // use min vol
-    trade.vol = std::min(pSrc->curVolume, pDest->curVolume);
+    trade.vol = std::min(src.curVolume, dest.curVolume);
 
     // use src side
-    if (pSrc->orderSide == ORDER_BUY) {
+    if (src.orderSide == ORDER_BUY) {
       trade.tradeSide = TRADE_BUY;
 
-      trade.buyOrderID = pSrc->orderID;
-      trade.sellOrderID = pDest->orderID;
+      trade.buyOrderID = src.orderID;
+      trade.sellOrderID = dest.orderID;
     } else {
       trade.tradeSide = TRADE_SELL;
 
-      trade.sellOrderID = pSrc->orderID;
-      trade.buyOrderID = pDest->orderID;
+      trade.sellOrderID = src.orderID;
+      trade.buyOrderID = dest.orderID;
     }
 
-    pSrc->procTransaction(m_cfgCategory, trade.price, trade.vol);
-    pDest->procTransaction(m_cfgCategory, trade.price, trade.vol);
+    src.procTransaction(m_cfgCategory, trade.price, trade.vol);
+    dest.procTransaction(m_cfgCategory, trade.price, trade.vol);
 
     trade.ct = ct;
   }
@@ -153,6 +199,7 @@ class ExchangeCategory {
   TradeT& _newTrade() { return m_mgrTrade.newTrade(); }
 
  protected:
+  OrderMgrT& m_mgrOrder;
   TradeMgrT& m_mgrTrade;
   CategoryConfigT& m_cfgCategory;
 
@@ -203,11 +250,16 @@ class Exchange {
     return *pCfg;
   }
 
-  void onTick(time_t ct, WalletT& wallet) {
+  void addExchangeCategory(ExchangeCategoryT& ec) {
+    m_mapCategory[ec.getName()] = &ec;
+  }
+
+  void onTick(WalletT& wallet, time_t ct) {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
-      it->second->onTick(ct, wallet,
-                         getCategoryConfigWithName(it->second->getName()));
+      it->second->onTick(wallet, ct);
+      // it->second->onTick(ct, wallet,
+      //                    getCategoryConfigWithName(it->second->getName()));
     }
   }
 

@@ -4,6 +4,10 @@
 #include "candle.h"
 #include "csvfile.h"
 #include "exchange.h"
+#include "order.h"
+#include "ordermgr.h"
+#include "trade.h"
+#include "trademgr.h"
 #include "utils.h"
 
 namespace trading {
@@ -13,16 +17,42 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
  public:
   typedef ExchangeCategory<MoneyType, VolumeType> ExchangeCategoryT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
+  typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef Wallet<MoneyType, VolumeType> WalletT;
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
+  typedef Order<MoneyType, VolumeType> OrderT;
+  typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
+  typedef Trade<MoneyType, VolumeType> TradeT;
+  typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
+  typedef typename ExchangeCategoryT::OrderList OrderList;
+  typedef typename ExchangeCategoryT::OrderListIter OrderListIter;
 
  public:
-  SimExchangeCategory() {}
+  SimExchangeCategory() : m_curCandleIndex(0) {}
   virtual ~SimExchangeCategory() {}
 
  public:
-  virtual void onTick(time_t ct, WalletT& wallet, CategoryConfigT& cfg) {
+  virtual void onTick(WalletT& wallet, time_t bt, time_t ct) {
+    for (int i = m_curCandleIndex; i < m_lstCandle.getLength(); ++i) {
+      const CandleDataT& cd = m_lstCandle.get(i);
+      if (cd.curtime > ct) {
+        return;
+      }
 
+      if (cd.curtime > bt && cd.curtime <= ct) {
+        VolumeType lastVol = cd.volume;
+
+        if (lastVol > 0) {
+          _procCandleBuyOrderList(cd, lastVol);
+        }
+
+        if (lastVol > 0) {
+          _procCandleSellOrderList(cd, lastVol);
+        }
+      }
+
+      m_curCandleIndex = i;
+    }
   }
 
  public:
@@ -82,7 +112,81 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   }
 
  protected:
+  void _procCandle(OrderT& order, CandleDataT& candle, VolumeType& lastVol) {
+    if (order.side == ORDER_BUY) {
+      _procCandleBuyOrder(order, candle, lastVol);
+    } else {
+      _procCandleSellOrder(order, candle, lastVol);
+    }
+  }
+
+  void _procCandleBuyOrder(OrderT& order, CandleDataT& candle,
+                           VolumeType& lastVol) {
+    assert(order.side == ORDER_BUY);
+
+    if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
+      VolumeType vol = std::min(order.curVolume, lastVol);
+
+      order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
+
+      lastVol -= vol;
+    }
+  }
+
+  void _procCandleSellOrder(OrderT& order, CandleDataT& candle,
+                            VolumeType& lastVol) {
+    assert(order.side == ORDER_SELL);
+
+    if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
+      VolumeType vol = std::min(order.curVolume, lastVol);
+
+      order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
+
+      lastVol -= vol;
+    }
+  }
+
+  void _procCandleBuyOrderList(CandleDataT& candle, VolumeType& lastVol) {
+    int off = 1;
+    for (int i = 0; i < this->m_lstOrderBuy.size(); i += off) {
+      off = 1;
+      OrderT* pOrder = this->m_lstOrderBuy[i];
+
+      _procCandle(*pOrder, candle, lastVol);
+
+      if (pOrder->curVolume <= 0) {
+        this->_deleteOrder(pOrder->orderID, pOrder->side);
+        off = 0;
+      }
+
+      if (lastVol <= 0) {
+        return;
+      }
+    }
+  }
+
+  void _procCandleSellOrderList(CandleDataT& candle, VolumeType& lastVol) {
+    int off = 1;
+    for (int i = 0; i < this->m_lstOrderSell.size(); i += off) {
+      off = 1;
+      OrderT* pOrder = this->m_lstOrderSell[i];
+
+      _procCandle(*pOrder, candle, lastVol);
+
+      if (pOrder->curVolume <= 0) {
+        this->_deleteOrder(pOrder->orderID, pOrder->side);
+        off = 0;
+      }
+
+      if (lastVol <= 0) {
+        return;
+      }
+    }
+  }
+
+ protected:
   CandleListT m_lstCandle;
+  int m_curCandleIndex;
 };
 
 template <typename MoneyType, typename VolumeType>

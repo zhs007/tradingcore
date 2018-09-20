@@ -42,15 +42,23 @@ struct Order {
   void procTransaction(CategoryConfigT& cfg, MoneyType price, VolumeType vol) {
     assert(vol > 0);
     assert(vol <= curVolume);
+    assert(destVolume >= curVolume);
 
     if (orderSide == ORDER_BUY) {
       assert(price <= destPrice);
 
-      AvgPriceResultT ap = cfg.countAvgPriceEx(avgPrice, destVolume - curVolume, price, vol);
+      AvgPriceResultT ap =
+          cfg.countAvgPriceEx(avgPrice, destVolume - curVolume, price, vol);
+      avgPrice = ap.avgPrice;
+      curVolume = ap.lastVolume;
     } else {
       assert(price >= destPrice);
-    }
 
+      AvgPriceResultT ap =
+          cfg.countAvgPriceEx(avgPrice, -(destVolume - curVolume), price, -vol);
+      avgPrice = ap.avgPrice;
+      curVolume = std::abs(ap.lastVolume);
+    }
   }
 };
 
