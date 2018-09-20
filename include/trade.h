@@ -8,40 +8,41 @@
 
 namespace trading {
 
-enum TRADE_TYPE { TRADE_MAKER = 0, TRADE_TAKER };
+// enum TRADE_TYPE { TRADE_MAKER = 0, TRADE_TAKER };
 
-enum TRADE_SIDE { TRADE_SELL = 0, TRADE_BUY };
+enum TRADE_SIDE { TRADE_BUY = 0, TRADE_SELL };
 
-template <typename MoneyType, typename VolumeType>
-struct TradeSideDetail {
-  TRADE_SIDE side;
+// template <typename MoneyType, typename VolumeType>
+// struct TradeSideDetail {
+//   TRADE_SIDE side;
 
-  // last value
-  MoneyType value;
+//   // last value
+//   MoneyType value;
 
-  MoneyType srcPrice;
+//   MoneyType srcPrice;
 
-  MoneyType fee;
-};
+//   MoneyType fee;
+// };
 
 template <typename MoneyType, typename VolumeType>
 struct Trade {
-  typedef TradeSideDetail<MoneyType, VolumeType> TradeSideDetailT;
+  // typedef TradeSideDetail<MoneyType, VolumeType> TradeSideDetailT;
 
   TradeID tradeID;
 
-  TRADE_TYPE tradeType;
-  // TRADE_SIDE tradeSide;
+  // TRADE_TYPE tradeType;
+  TRADE_SIDE tradeSide;
 
-  OrderID orderID;
+  OrderID buyOrderID;
+  OrderID sellOrderID;
 
   time_t ct;
 
   VolumeType vol;
   MoneyType price;
 
-  TradeSideDetailT buyDetail;
-  TradeSideDetailT sellDetail;
+  // TradeSideDetailT buyDetail;
+  // TradeSideDetailT sellDetail;
 };
 
 }  // namespace trading

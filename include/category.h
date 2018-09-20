@@ -9,7 +9,17 @@ namespace trading {
 enum FEE_TYPE { FEE_FREE = 0, FEE_NORMAL, FEE_MIN, FEE_MAX, FEE_MINMAX };
 
 template <typename MoneyType, typename VolumeType>
+struct AvgPriceResult {
+  MoneyType avgPrice;
+  VolumeType lastVolume;
+
+  AvgPriceResult(MoneyType p, VolumeType v) : avgPrice(p), lastVolume(v) {}
+};
+
+template <typename MoneyType, typename VolumeType>
 struct CategoryConfig {
+  typedef AvgPriceResult<MoneyType, VolumeType> AvgPriceResultT;
+
   std::string code;
 
   VolumeType unit;
@@ -46,6 +56,51 @@ struct CategoryConfig {
 
   MoneyType countAvgPrice(MoneyType cost, VolumeType vol) const {
     return std::abs(unit * cost / vol);
+  }
+
+  AvgPriceResultT countAvgPriceEx(MoneyType oldPrice, VolumeType oldVol,
+                                  MoneyType curPrice, VolumeType curVol) const {
+    AvgPriceResultT ap(oldPrice, oldVol);
+
+    if (curVol == 0) {
+      return ap;
+    }
+
+    if (oldVol == 0) {
+      ap.avgPrice = curPrice;
+      ap.lastVolume = curVol;
+
+      return ap;
+    }
+
+    // if curVol, oldVol > 0 or curVol, oldVol < 0
+    if ((curVol > 0) == (oldVol > 0)) {
+      MoneyType old = countValueEx(oldPrice, oldVol);
+      MoneyType cur = countValueEx(curPrice, curVol);
+
+      ap.avgPrice = countAvgPrice(old + cur, oldVol + curVol);
+      ap.lastVolume += curVol;
+
+      return ap;
+    }
+
+    // if left
+    if (std::abs(oldVol) >= std::abs(curVol)) {
+      ap.lastVolume += curVol;
+
+      if (ap.lastVolume == 0) {
+        ap.avgPrice = 0;
+      }
+
+      return ap;
+    }
+
+    // if change side
+    ap.lastVolume += curVol;
+
+    ap.avgPrice = curPrice;
+
+    return ap;
   }
 
   void setUnitPrice(VolumeType u, MoneyType p) {
@@ -102,40 +157,47 @@ struct CategoryConfig {
 template <typename MoneyType, typename VolumeType>
 struct CategoryInfo {
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
+  typedef AvgPriceResult<MoneyType, VolumeType> AvgPriceResultT;
 
   std::string code;
   VolumeType vol;
   MoneyType avgPrice;
 
   void chgVolume(CategoryConfigT& cfg, MoneyType price, VolumeType off) {
-    if (off == 0) {
-      return;
-    }
+    AvgPriceResultT ap = cfg.countAvgPriceEx(avgPrice, vol, price, off);
 
-    if (vol == 0) {
-      vol = off;
-      avgPrice = price;
-    } else {
-      if ((off > 0) == (vol > 0)) {
-        MoneyType old = cfg.countValueEx(avgPrice, vol);
-        MoneyType cur = cfg.countValueEx(price, off);
+    vol = ap.lastVolume;
+    avgPrice = ap.avgPrice;
+    //   if (off == 0) {
+    //     return;
+    //   }
 
-        vol += off;
-        avgPrice = cfg.countAvgPrice(old + cur, vol);
-      } else {
-        if (std::abs(vol) >= std::abs(off)) {
-          vol += off;
+    //   if (vol == 0) {
+    //     vol = off;
+    //     avgPrice = price;
+    //   } else {
+    //     if ((off > 0) == (vol > 0)) {
+    //       avgPrice = cfg.countAvgPriceEx(avgPrice, vol, price, off);
 
-          if (vol == 0) {
-            avgPrice = 0;
-          }
-        } else {
-          vol += off;
+    //       // MoneyType old = cfg.countValueEx(avgPrice, vol);
+    //       // MoneyType cur = cfg.countValueEx(price, off);
 
-          avgPrice = price;
-        }
-      }
-    }
+    //       vol += off;
+    //       // avgPrice = cfg.countAvgPrice(old + cur, vol);
+    //     } else {
+    //       if (std::abs(vol) >= std::abs(off)) {
+    //         vol += off;
+
+    //         if (vol == 0) {
+    //           avgPrice = 0;
+    //         }
+    //       } else {
+    //         vol += off;
+
+    //         avgPrice = price;
+    //       }
+    //     }
+    //   }
   }
 };
 
