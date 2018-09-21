@@ -32,6 +32,22 @@ struct CSVConfig {
 typedef int64_t TradeID;
 typedef int64_t OrderID;
 
+// Percent
+
+enum PERCENT_TYPE { PERCENT_TYPE_FIXEDPOINT_MILLION = 0 };
+
+template <typename PercentType, typename NumType, PERCENT_TYPE PT>
+struct PercentProc {
+  static PercentType countPercent(NumType num, NumType den);
+};
+
+template <typename PercentType, typename NumType>
+struct PercentProc<PercentType, NumType, PERCENT_TYPE_FIXEDPOINT_MILLION> {
+  static PercentType countPercent(NumType num, NumType den) {
+    return num * 1000000 / den;
+  }
+};
+
 // template<typename PriceType>
 // PriceType str2Price(const char* str);
 
@@ -39,7 +55,7 @@ typedef int64_t OrderID;
 // PriceType str2Price(const char* str, int scale) {
 //     double dv = std::stod(str);
 //     open = o * cfg.scalePrice;
-//     return 
+//     return
 // }
 
 }  // namespace trading
