@@ -5,6 +5,7 @@
 #include "csvfile.h"
 #include "exchange.h"
 #include "order.h"
+#include "orderlogic.h"
 #include "ordermgr.h"
 #include "trade.h"
 #include "trademgr.h"
@@ -26,9 +27,11 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
   typedef typename ExchangeCategoryT::OrderList OrderList;
   typedef typename ExchangeCategoryT::OrderListIter OrderListIter;
+  typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
 
  public:
-  SimExchangeCategory() : m_curCandleIndex(0) {}
+  SimExchangeCategory(OrderLogicT& orderLogic)
+      : m_curCandleIndex(0), m_orderLogic(orderLogic) {}
   virtual ~SimExchangeCategory() {}
 
  public:
@@ -112,39 +115,39 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   }
 
  protected:
-  void _procCandle(OrderT& order, CandleDataT& candle, VolumeType& lastVol) {
-    if (order.side == ORDER_BUY) {
-      _procCandleBuyOrder(order, candle, lastVol);
-    } else {
-      _procCandleSellOrder(order, candle, lastVol);
-    }
-  }
+  // void _procCandle(OrderT& order, CandleDataT& candle, VolumeType& lastVol) {
+  //   if (order.side == ORDER_BUY) {
+  //     _procCandleBuyOrder(order, candle, lastVol);
+  //   } else {
+  //     _procCandleSellOrder(order, candle, lastVol);
+  //   }
+  // }
 
-  void _procCandleBuyOrder(OrderT& order, CandleDataT& candle,
-                           VolumeType& lastVol) {
-    assert(order.side == ORDER_BUY);
+  // void _procCandleBuyOrder(OrderT& order, CandleDataT& candle,
+  //                          VolumeType& lastVol) {
+  //   assert(order.side == ORDER_BUY);
 
-    if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
-      VolumeType vol = std::min(order.curVolume, lastVol);
+  //   if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
+  //     VolumeType vol = std::min(order.curVolume, lastVol);
 
-      order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
+  //     order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
 
-      lastVol -= vol;
-    }
-  }
+  //     lastVol -= vol;
+  //   }
+  // }
 
-  void _procCandleSellOrder(OrderT& order, CandleDataT& candle,
-                            VolumeType& lastVol) {
-    assert(order.side == ORDER_SELL);
+  // void _procCandleSellOrder(OrderT& order, CandleDataT& candle,
+  //                           VolumeType& lastVol) {
+  //   assert(order.side == ORDER_SELL);
 
-    if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
-      VolumeType vol = std::min(order.curVolume, lastVol);
+  //   if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
+  //     VolumeType vol = std::min(order.curVolume, lastVol);
 
-      order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
+  //     order.procTransaction(this->m_cfgCategory, order.destPrice, vol);
 
-      lastVol -= vol;
-    }
-  }
+  //     lastVol -= vol;
+  //   }
+  // }
 
   void _procCandleBuyOrderList(CandleDataT& candle, VolumeType& lastVol) {
     int off = 1;
@@ -152,7 +155,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
       off = 1;
       OrderT* pOrder = this->m_lstOrderBuy[i];
 
-      _procCandle(*pOrder, candle, lastVol);
+      m_orderLogic.procCandle(*pOrder, candle, lastVol);
 
       if (pOrder->curVolume <= 0) {
         this->_deleteOrder(pOrder->orderID, pOrder->side);
@@ -171,7 +174,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
       off = 1;
       OrderT* pOrder = this->m_lstOrderSell[i];
 
-      _procCandle(*pOrder, candle, lastVol);
+      m_orderLogic.procCandle(*pOrder, candle, lastVol);
 
       if (pOrder->curVolume <= 0) {
         this->_deleteOrder(pOrder->orderID, pOrder->side);
@@ -187,6 +190,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
  protected:
   CandleListT m_lstCandle;
   int m_curCandleIndex;
+  OrderLogicT& m_orderLogic;
 };
 
 template <typename MoneyType, typename VolumeType>
