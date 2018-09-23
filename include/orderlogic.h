@@ -106,7 +106,7 @@ class OrderLogic_Simple2 : public OrderLogic<MoneyType, VolumeType> {
     assert(order.side == ORDER_BUY);
 
     if (order.destPrice >= candle.close) {
-      PriceType price = std::min(order.destPrice, candle.close);
+      MoneyType price = std::min(order.destPrice, candle.close);
       VolumeType vol = std::min(order.curVolume, lastVol);
 
       order.procTransaction(cfg, price, vol);
@@ -120,7 +120,7 @@ class OrderLogic_Simple2 : public OrderLogic<MoneyType, VolumeType> {
     assert(order.side == ORDER_SELL);
 
     if (order.destPrice <= candle.close) {
-      PriceType price = std::max(order.destPrice, candle.close);
+      MoneyType price = std::max(order.destPrice, candle.close);
       VolumeType vol = std::min(order.curVolume, lastVol);
 
       order.procTransaction(cfg, order.destPrice, vol);

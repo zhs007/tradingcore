@@ -40,6 +40,10 @@ void testLoadCSV(const char* filename) {
     trading::saveCSVInt64(lstCandle, "output.csv", cfg);
 }
 
+void testTrader() {
+  trading::TraderInt64 trader;
+}
+
 int main() {
   testLoadCSV("samplecsv/noformat.csv");
 

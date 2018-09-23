@@ -3,13 +3,23 @@
 
 #include "candle.h"
 #include "csvfile.h"
+#include "exchange.h"
 #include "indicator.h"
+#include "order.h"
+#include "orderlogic.h"
+#include "ordermgr.h"
+#include "simexchange.h"
+#include "trade.h"
+#include "trademgr.h"
+#include "trader.h"
 #include "utils.h"
+#include "wallet.h"
 
 namespace trading {
 
 typedef CandleData<int64_t, int64_t> CandleDataInt64;
 typedef CandleList<int64_t, int64_t> CandleListInt64;
+typedef Trader<int64_t, int64_t, int64_t> TraderInt64;
 
 bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
                   CSVConfig& cfg);

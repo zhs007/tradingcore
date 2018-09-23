@@ -8,6 +8,8 @@ namespace trading {
 
 template <typename MoneyType, typename VolumeType>
 struct CandleData {
+  typedef CandleData<MoneyType, VolumeType> CandleDataT;
+
   time_t curtime;
   MoneyType open, close, high, low;
   VolumeType volume;
@@ -52,6 +54,54 @@ struct CandleData {
       openInterest = 0;
     }
   }
+
+  void merge(CandleDataT& dat) {
+    format();
+    dat.format();
+
+    if (dat.curtime > curtime) {
+      close = dat.close;
+    } else if (dat.curtime < curtime) {
+      open = dat.open;
+    }
+
+    if (dat.low < low) {
+      low = dat.low;
+    }
+
+    if (dat.high > high) {
+      high = dat.high;
+    }
+
+    volume += dat.volume;
+    if (dat.openInterest > openInterest) {
+      openInterest = dat.openInterest;
+    }
+  }
+
+  void mergeEx(CandleDataT& dat, bool btimeup) {
+    format();
+    dat.format();
+
+    if (btimeup) {
+      close = dat.close;
+    } else {
+      open = dat.open;
+    }
+
+    if (dat.low < low) {
+      low = dat.low;
+    }
+
+    if (dat.high > high) {
+      high = dat.high;
+    }
+
+    volume += dat.volume;
+    if (dat.openInterest > openInterest) {
+      openInterest = dat.openInterest;
+    }
+  }
 };
 
 template <typename MoneyType, typename VolumeType>
@@ -89,7 +139,7 @@ class CandleList {
 
     time_t ct = bt;
     ListIter preit = m_lst.end();
-    for (ListIter it = m_lst.begin(); it != m_lst.end(); ++it) {
+    for (ListIter it = m_lst.begin(); it != m_lst.end();) {
       time_t cnt = formatTime(it->curtime);
       if (cnt != it->curtime) {
         it->curtime = cnt;
@@ -104,52 +154,68 @@ class CandleList {
           it = preit + 1;
           ct += m_offTime;
         } while (ct < cnt);
+
+        formatCandle(preit, it);
+        preit = it;
+        ++it;
       } else if (cnt < ct) {
         assert(preit != m_lst.end());
-        CandleDataT cd(ct, preit->close, it->close, it->high, it->low,
-                       it->volume, it->openInterest);
+        assert(preit->curtime == cnt);
 
-        cd.format();
+        preit->mergeEx(*it, true);
+        it = m_lst.erase(it);
 
-        do {
-          it = m_lst.erase(it);
-          if (it == m_lst.end()) {
-            break;
-          }
-          cnt = formatTime(it->curtime);
-          if (cnt <= ct) {
-            it->format();
+        // CandleDataT cd(preit->curtime, preit->close, it->close, it->high,
+        //                it->low, it->volume, it->openInterest);
 
-            cd.close = it->close;
-            cd.volume += it->volume;
-            cd.openInterest = it->openInterest;
+        // cd.format();
 
-            if (cd.low > it->low) {
-              cd.low = it->low;
-            }
-            if (cd.high < it->high) {
-              cd.high = it->high;
-            }
-          }
-        } while (cnt <= ct);
+        // do {
+        //   it = m_lst.erase(it);
+        //   if (it == m_lst.end()) {
+        //     break;
+        //   }
+        //   cnt = formatTime(it->curtime);
+        //   if (cnt < ct) {
+        //     it->format();
 
-        if (it == m_lst.end()) {
-          it = m_lst.insert(m_lst.end(), cd);
-        } else {
-          it = m_lst.insert(it, cd);
-        }
+        //     cd.close = it->close;
+        //     cd.volume += it->volume;
+        //     cd.openInterest = it->openInterest;
+
+        //     if (cd.low > it->low) {
+        //       cd.low = it->low;
+        //     }
+        //     if (cd.high < it->high) {
+        //       cd.high = it->high;
+        //     }
+        //   }
+        // } while (cnt < ct);
+
+        // if (it == m_lst.end()) {
+        //   it = m_lst.insert(m_lst.end(), cd);
+        // } else {
+        //   it = m_lst.insert(it, cd);
+        // }
       } else {
         ct += m_offTime;
-      }
 
-      formatCandle(preit, it);
-      preit = it;
+        formatCandle(preit, it);
+        preit = it;
+        ++it;
+      }
     }
 
     return true;
   }
 
-  time_t formatTime(time_t ct) { return ct - (ct % m_offTime); }
+  time_t formatTime(time_t ct) {
+    time_t ot = ct % m_offTime;
+    if (ot > 0) {
+      return ct - ot + m_offTime;
+    }
+    return ct;
+  }
 
   void formatCandle(ListIter preit, ListIter it) {
     if (preit != m_lst.end()) {
