@@ -45,6 +45,8 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
         return;
       }
 
+      // printf("%ld ", cd.curtime);
+
       if (cd.curtime > bt && cd.curtime <= ct) {
         VolumeType lastVol = cd.volume;
 
@@ -86,11 +88,14 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
       const char* strOpenInterest = csv.get(i, cfg.head.openInterest.c_str());
 
       if (cfg.timeType == CSVTIME_FORMAT_STR) {
-        tm curtm;
-        strptime(strTime, "%Y-%m-%d %H:%M:%S", &curtm);
+        curtime = str2time(strTime);
+        // printf("%s", strTime);
+        // printf("%ld ", curtime);
+        // tm curtm;
+        // strptime(strTime, "%Y-%m-%d %H:%M:%S", &curtm);
 
-        curtm.tm_isdst = -1;
-        curtime = mktime(&curtm);
+        // curtm.tm_isdst = -1;
+        // curtime = mktime(&curtm);
       } else if (cfg.timeType == CSVTIME_TIMESTAMP) {
         curtime = std::stoll(strTime);
       }
@@ -217,7 +222,7 @@ class SimExchange : public Exchange<MoneyType, VolumeType> {
                               const char* nameCategory, const char* filename,
                               CSVConfig& cfg) {
     SimExchangeCategoryT* pSEC = new SimExchangeCategoryT(
-        nameCategory, this->getCategoryConfigWithName(codeCategory),
+        nameCategory, this->getCategoryConfigWithName(nameCategory),
         m_orderLogic);
     this->m_mapCategory[nameCategory] = pSEC;
 

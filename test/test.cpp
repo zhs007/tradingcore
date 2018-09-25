@@ -23,6 +23,7 @@ void testLoadCSV(const char* filename) {
 
   cfg.scalePrice = 100;
   cfg.scaleVolume = 100;
+  cfg.timeType = trading::CSVTIME_FORMAT_STR;
 
   bool loadok = trading::loadCSVInt64(lstCandle, filename, cfg);
   if (!loadok) {
@@ -52,6 +53,7 @@ void testTrader() {
 
   cfg.scalePrice = 100;
   cfg.scaleVolume = 100;
+  cfg.timeType = trading::CSVTIME_FORMAT_STR;
 
   trading::OrderLogic_Simple2Int64 orderlogic;
   trading::TraderInt64 trader;
@@ -59,6 +61,8 @@ void testTrader() {
   // trading::SimExchangeCategoryInt64 pta1601("pta1601",
   // exchange.getCategoryConfigWithName("pta"), orderlogic);
 
+  exchange.addCategory("pta1601", "pta");
+  exchange.newCategoryConfig("pta", 1, 1);
   exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
 
   trader.addExchange(exchange);
@@ -69,6 +73,7 @@ void testTrader() {
 
 int main() {
   testLoadCSV("samplecsv/noformat.csv");
+  testTrader();
 
   return 0;
 }

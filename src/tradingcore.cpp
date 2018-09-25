@@ -30,11 +30,12 @@ bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
     const char* strOpenInterest = csv.get(i, cfg.head.openInterest.c_str());
 
     if (cfg.timeType == CSVTIME_FORMAT_STR) {
-      tm curtm;
-      strptime(strTime, "%Y-%m-%d %H:%M:%S", &curtm);
+      curtime = str2time(strTime);
+      // tm curtm;
+      // strptime(strTime, "%Y-%m-%d %H:%M:%S", &curtm);
 
-      curtm.tm_isdst = -1;
-      curtime = mktime(&curtm);
+      // curtm.tm_isdst = -1;
+      // curtime = mktime(&curtm);
     } else if (cfg.timeType == CSVTIME_TIMESTAMP) {
       curtime = std::stoll(strTime);
     }
