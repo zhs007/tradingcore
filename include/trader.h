@@ -18,7 +18,7 @@ struct TraderExchangeInfo {
   ExchangeT& exchange;
   PNLT pnl;
 
-  TraderExchangeInfo(ExchangeT& e) : exchange(e) {}
+  TraderExchangeInfo(ExchangeT& e) : exchange(e), wallet(e.getCategoryMgr()) {}
 };
 
 template <typename MoneyType, typename VolumeType, typename PercentType>
@@ -26,7 +26,10 @@ class Trader {
  public:
   typedef TraderExchangeInfo<MoneyType, VolumeType, PercentType>
       TraderExchangeInfoT;
-  typedef std::map<std::string, TraderExchangeInfoT> ExchangeMap;
+  typedef std::map<std::string, TraderExchangeInfoT*> ExchangeMap;
+  typedef typename ExchangeMap::iterator ExchangeMapIter;
+  typedef std::pair<std::string, TraderExchangeInfoT*> ExchangePair;
+  typedef Exchange<MoneyType, VolumeType> ExchangeT;
   typedef PNL<PercentType> PNLT;
 
  public:
@@ -34,6 +37,21 @@ class Trader {
   ~Trader() {}
 
  public:
+  void addExchange(ExchangeT& exchange) {
+    ExchangePair p(exchange.getName(), new TraderExchangeInfoT(exchange));
+
+    m_map.insert(p);
+  }
+
+  void startSimTrade(time_t bt, time_t et, time_t ot) {
+    time_t pt = bt;
+    for (time_t ct = bt; ct <= et; pt = ct, ct += ot) {
+      for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
+        it->second->exchange.onTick(it->second->wallet, pt, ct);
+      }
+    }
+  }
+
  protected:
   ExchangeMap m_map;
   PNLT m_pnl;

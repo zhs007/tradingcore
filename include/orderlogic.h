@@ -22,8 +22,8 @@ class OrderLogic {
   virtual ~OrderLogic() {}
 
  public:
-  virtual void procCandle(CategoryConfigT& cfg, OrderT& order,
-                          CandleDataT& candle, VolumeType& lastVol) = 0;
+  virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
+                          const CandleDataT& candle, VolumeType& lastVol) = 0;
 
  protected:
 };
@@ -41,8 +41,8 @@ class OrderLogic_Simple : public OrderLogic<MoneyType, VolumeType> {
   virtual ~OrderLogic_Simple() {}
 
  public:
-  virtual void procCandle(CategoryConfigT& cfg, OrderT& order,
-                          CandleDataT& candle, VolumeType& lastVol) {
+  virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
+                          const CandleDataT& candle, VolumeType& lastVol) {
     if (order.side == ORDER_BUY) {
       _procCandleBuyOrder(cfg, order, candle, lastVol);
     } else {
@@ -50,8 +50,8 @@ class OrderLogic_Simple : public OrderLogic<MoneyType, VolumeType> {
     }
   }
 
-  void _procCandleBuyOrder(CategoryConfigT& cfg, OrderT& order,
-                           CandleDataT& candle, VolumeType& lastVol) {
+  void _procCandleBuyOrder(const CategoryConfigT& cfg, OrderT& order,
+                           const CandleDataT& candle, VolumeType& lastVol) {
     assert(order.side == ORDER_BUY);
 
     if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
@@ -63,8 +63,8 @@ class OrderLogic_Simple : public OrderLogic<MoneyType, VolumeType> {
     }
   }
 
-  void _procCandleSellOrder(CategoryConfigT& cfg, OrderT& order,
-                            CandleDataT& candle, VolumeType& lastVol) {
+  void _procCandleSellOrder(const CategoryConfigT& cfg, OrderT& order,
+                            const CandleDataT& candle, VolumeType& lastVol) {
     assert(order.side == ORDER_SELL);
 
     if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
@@ -92,18 +92,18 @@ class OrderLogic_Simple2 : public OrderLogic<MoneyType, VolumeType> {
   virtual ~OrderLogic_Simple2() {}
 
  public:
-  virtual void procCandle(CategoryConfigT& cfg, OrderT& order,
-                          CandleDataT& candle, VolumeType& lastVol) {
-    if (order.side == ORDER_BUY) {
+  virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
+                          const CandleDataT& candle, VolumeType& lastVol) {
+    if (order.orderSide == ORDER_BUY) {
       _procCandleBuyOrder(cfg, order, candle, lastVol);
     } else {
       _procCandleSellOrder(cfg, order, candle, lastVol);
     }
   }
 
-  void _procCandleBuyOrder(CategoryConfigT& cfg, OrderT& order,
-                           CandleDataT& candle, VolumeType& lastVol) {
-    assert(order.side == ORDER_BUY);
+  void _procCandleBuyOrder(const CategoryConfigT& cfg, OrderT& order,
+                           const CandleDataT& candle, VolumeType& lastVol) {
+    assert(order.orderSide == ORDER_BUY);
 
     if (order.destPrice >= candle.close) {
       MoneyType price = std::min(order.destPrice, candle.close);
@@ -115,9 +115,9 @@ class OrderLogic_Simple2 : public OrderLogic<MoneyType, VolumeType> {
     }
   }
 
-  void _procCandleSellOrder(CategoryConfigT& cfg, OrderT& order,
-                            CandleDataT& candle, VolumeType& lastVol) {
-    assert(order.side == ORDER_SELL);
+  void _procCandleSellOrder(const CategoryConfigT& cfg, OrderT& order,
+                            const CandleDataT& candle, VolumeType& lastVol) {
+    assert(order.orderSide == ORDER_SELL);
 
     if (order.destPrice <= candle.close) {
       MoneyType price = std::max(order.destPrice, candle.close);

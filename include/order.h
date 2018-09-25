@@ -39,7 +39,7 @@ struct Order {
   TradeList lstTrade;
 
   // vol > 0
-  void procTransaction(CategoryConfigT& cfg, MoneyType price, VolumeType vol) {
+  void procTransaction(const CategoryConfigT& cfg, MoneyType price, VolumeType vol) {
     assert(vol > 0);
     assert(vol <= curVolume);
     assert(destVolume >= curVolume);

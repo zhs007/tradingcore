@@ -24,7 +24,7 @@ class ExchangeCategory {
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
 
  public:
-  ExchangeCategory(const char* name, CategoryConfigT& cfg)
+  ExchangeCategory(const char* name, const CategoryConfigT& cfg)
       : m_nameCategory(name),
         m_mgrTrade(*(getTradeMgr<MoneyType, VolumeType>())),
         m_cfgCategory(cfg),
@@ -95,7 +95,7 @@ class ExchangeCategory {
     for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();
          ++it) {
       if (order.destPrice > (*it)->destPrice) {
-        m_lstOrderBuy.insert(&order);
+        m_lstOrderBuy.insert(it, &order);
 
         return;
       }
@@ -125,7 +125,7 @@ class ExchangeCategory {
     for (OrderListIter it = m_lstOrderSell.begin();
          it != m_lstOrderSell.end();) {
       if (order.destPrice >= (*it)->destPrice) {
-        _procTransaction(order, *it, ct);
+        _procTransaction(order, **it, ct);
 
         if ((*it)->curVolume <= 0) {
           it = m_lstOrderSell.erase(it);
@@ -147,7 +147,7 @@ class ExchangeCategory {
 
     for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();) {
       if (order.destPrice <= (*it)->destPrice) {
-        _procTransaction(order, *it, ct);
+        _procTransaction(order, **it, ct);
 
         if ((*it)->curVolume <= 0) {
           it = m_lstOrderBuy.erase(it);
@@ -201,7 +201,7 @@ class ExchangeCategory {
  protected:
   OrderMgrT& m_mgrOrder;
   TradeMgrT& m_mgrTrade;
-  CategoryConfigT& m_cfgCategory;
+  const CategoryConfigT& m_cfgCategory;
 
   std::string m_nameCategory;
 
@@ -223,7 +223,7 @@ class Exchange {
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
 
  public:
-  Exchange() {}
+  Exchange(const char* name) : m_nameExchange(name) {}
   ~Exchange() {}
 
  public:
@@ -240,11 +240,11 @@ class Exchange {
     m_mapCategoryCode[name] = code;
   }
 
-  CategoryConfigT& getCategoryConfigWithName(const char* name) {
+  const CategoryConfigT& getCategoryConfigWithName(const char* name) {
     CategoryCodeMapIter it = m_mapCategoryCode.find(name);
     assert(it != m_mapCategoryCode.end());
 
-    CategoryConfigT* pCfg = m_mgrCategory.getConfig(it->second.c_str());
+    const CategoryConfigT* pCfg = m_mgrCategory.getConfig(it->second.c_str());
     assert(pCfg != NULL);
 
     return *pCfg;
@@ -254,14 +254,18 @@ class Exchange {
     m_mapCategory[ec.getName()] = &ec;
   }
 
-  void onTick(WalletT& wallet, time_t ct) {
+  void onTick(WalletT& wallet, time_t bt, time_t ct) {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
-      it->second->onTick(wallet, ct);
+      it->second->onTick(wallet, bt, ct);
       // it->second->onTick(ct, wallet,
       //                    getCategoryConfigWithName(it->second->getName()));
     }
   }
+
+  const char* getName() const { return m_nameExchange.c_str(); }
+
+  CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
 
  protected:
   CategoryMgrT m_mgrCategory;

@@ -207,6 +207,8 @@ class CategoryMgr {
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
   typedef std::pair<std::string, CategoryConfigT> CategoryConfigPair;
   typedef std::map<std::string, CategoryConfigT> CategoryConfigMap;
+  typedef typename CategoryConfigMap::iterator CategoryConfigMapIterT;
+  typedef typename CategoryConfigMap::const_iterator CategoryConfigMapConstIterT;
 
  public:
   CategoryMgr() {}
@@ -223,8 +225,9 @@ class CategoryMgr {
   }
 
   const CategoryConfigT* getConfig(const char* code) const {
-    if (m_map.has(code)) {
-      return &(m_map[code]);
+    CategoryConfigMapConstIterT it = m_map.find(code);
+    if (it != m_map.end()) {
+      return &(it->second);
     }
 
     return NULL;

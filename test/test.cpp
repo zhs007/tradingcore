@@ -10,38 +10,61 @@ void testIndicator() {
 }
 
 void testLoadCSV(const char* filename) {
-    trading::CandleListInt64 lstCandle;
+  trading::CandleListInt64 lstCandle;
 
-    trading::CSVConfig cfg;
-    cfg.head.curtime = "__0";
-    cfg.head.open = "open";
-    cfg.head.close = "close";
-    cfg.head.high = "high";
-    cfg.head.low = "low";
-    cfg.head.volume = "volume";
-    cfg.head.openInterest = "oi";
+  trading::CSVConfig cfg;
+  cfg.head.curtime = "__0";
+  cfg.head.open = "open";
+  cfg.head.close = "close";
+  cfg.head.high = "high";
+  cfg.head.low = "low";
+  cfg.head.volume = "volume";
+  cfg.head.openInterest = "oi";
 
-    cfg.scalePrice = 100;
-    cfg.scaleVolume = 100;
+  cfg.scalePrice = 100;
+  cfg.scaleVolume = 100;
 
-    bool loadok = trading::loadCSVInt64(lstCandle, filename, cfg);
-    if (!loadok) {
-        printf("testLoadCSV %s fail.", filename);
+  bool loadok = trading::loadCSVInt64(lstCandle, filename, cfg);
+  if (!loadok) {
+    printf("testLoadCSV %s fail.", filename);
 
-        return ;
-    }
+    return;
+  }
 
-    printf("%s has %d rows", filename, lstCandle.getLength());
+  printf("%s has %d rows", filename, lstCandle.getLength());
 
-    lstCandle.format();
+  lstCandle.format();
 
-    printf("%s has %d rows", filename, lstCandle.getLength());
+  printf("%s has %d rows", filename, lstCandle.getLength());
 
-    trading::saveCSVInt64(lstCandle, "output.csv", cfg);
+  trading::saveCSVInt64(lstCandle, "output.csv", cfg);
 }
 
 void testTrader() {
+  trading::CSVConfig cfg;
+  cfg.head.curtime = "__0";
+  cfg.head.open = "open";
+  cfg.head.close = "close";
+  cfg.head.high = "high";
+  cfg.head.low = "low";
+  cfg.head.volume = "volume";
+  cfg.head.openInterest = "oi";
+
+  cfg.scalePrice = 100;
+  cfg.scaleVolume = 100;
+
+  trading::OrderLogic_Simple2Int64 orderlogic;
   trading::TraderInt64 trader;
+  trading::SimExchangeInt64 exchange("zss", orderlogic);
+  // trading::SimExchangeCategoryInt64 pta1601("pta1601",
+  // exchange.getCategoryConfigWithName("pta"), orderlogic);
+
+  exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
+
+  trader.addExchange(exchange);
+
+  trader.startSimTrade(trading::str2time("2015-04-21 21:01:00"),
+                       trading::str2time("2016-01-15 15:00:00"), 60);
 }
 
 int main() {

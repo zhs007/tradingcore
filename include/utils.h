@@ -1,6 +1,7 @@
 #ifndef __TRADINGCORE_UTILS_H__
 #define __TRADINGCORE_UTILS_H__
 
+#include <time.h>
 #include <string>
 
 namespace trading {
@@ -31,6 +32,13 @@ struct CSVConfig {
 
 typedef int64_t TradeID;
 typedef int64_t OrderID;
+
+inline time_t str2time(const char* str) {
+  tm tm;
+  strptime(str, "%Y-%m-%d %H:%M:%S", &tm);
+  tm.tm_isdst = -1;
+  return mktime(&tm);
+}
 
 // Percent
 

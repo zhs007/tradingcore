@@ -30,8 +30,11 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
 
  public:
-  SimExchangeCategory(OrderLogicT& orderLogic)
-      : m_curCandleIndex(0), m_orderLogic(orderLogic) {}
+  SimExchangeCategory(const char* name, const CategoryConfigT& cfg,
+                      OrderLogicT& orderLogic)
+      : ExchangeCategoryT(name, cfg),
+        m_curCandleIndex(0),
+        m_orderLogic(orderLogic) {}
   virtual ~SimExchangeCategory() {}
 
  public:
@@ -112,6 +115,8 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
 
       m_lstCandle.push(curtime, open, close, high, low, volume, openInterest);
     }
+
+    return true;
   }
 
  protected:
@@ -149,16 +154,16 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   //   }
   // }
 
-  void _procCandleBuyOrderList(CandleDataT& candle, VolumeType& lastVol) {
+  void _procCandleBuyOrderList(const CandleDataT& candle, VolumeType& lastVol) {
     int off = 1;
     for (int i = 0; i < this->m_lstOrderBuy.size(); i += off) {
       off = 1;
       OrderT* pOrder = this->m_lstOrderBuy[i];
 
-      m_orderLogic.procCandle(*pOrder, candle, lastVol);
+      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol);
 
       if (pOrder->curVolume <= 0) {
-        this->_deleteOrder(pOrder->orderID, pOrder->side);
+        this->_deleteOrder(pOrder->orderID, pOrder->orderSide);
         off = 0;
       }
 
@@ -168,16 +173,17 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
     }
   }
 
-  void _procCandleSellOrderList(CandleDataT& candle, VolumeType& lastVol) {
+  void _procCandleSellOrderList(const CandleDataT& candle,
+                                VolumeType& lastVol) {
     int off = 1;
     for (int i = 0; i < this->m_lstOrderSell.size(); i += off) {
       off = 1;
       OrderT* pOrder = this->m_lstOrderSell[i];
 
-      m_orderLogic.procCandle(*pOrder, candle, lastVol);
+      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol);
 
       if (pOrder->curVolume <= 0) {
-        this->_deleteOrder(pOrder->orderID, pOrder->side);
+        this->_deleteOrder(pOrder->orderID, pOrder->orderSide);
         off = 0;
       }
 
@@ -197,13 +203,35 @@ template <typename MoneyType, typename VolumeType>
 class SimExchange : public Exchange<MoneyType, VolumeType> {
  public:
   typedef Exchange<MoneyType, VolumeType> ExchangeT;
+  typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
+  typedef SimExchangeCategory<MoneyType, VolumeType> SimExchangeCategoryT;
+  typedef Wallet<MoneyType, VolumeType> WalletT;
 
  public:
-  SimExchange() {}
+  SimExchange(const char* name, OrderLogicT& orderLogic)
+      : ExchangeT(name), m_orderLogic(orderLogic) {}
   ~SimExchange() {}
 
  public:
+  void addSimExchangeCategory(const char* codeCategory,
+                              const char* nameCategory, const char* filename,
+                              CSVConfig& cfg) {
+    SimExchangeCategoryT* pSEC = new SimExchangeCategoryT(
+        nameCategory, this->getCategoryConfigWithName(codeCategory),
+        m_orderLogic);
+    this->m_mapCategory[nameCategory] = pSEC;
+
+    pSEC->loadCandleCSVFile(filename, cfg);
+  }
+
+  // void start(WalletT& wallet, time_t bt, time_t et, time_t ot) {
+  //   for (time_t ct = bt; ct <= et; ct += ot) {
+  //     this->onTick(wallet, ct);
+  //   }
+  // }
+
  protected:
+  OrderLogicT& m_orderLogic;
 };
 
 }  // namespace trading
