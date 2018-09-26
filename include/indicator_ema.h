@@ -9,10 +9,8 @@ namespace trading {
 
 enum INDICATOR_INDEX_EMA { EMA_PRICE = 0, EMA_EMA, EMA_VALUE_NUMS };
 
-template <typename MoneyType, typename VolumeType,
-          typename ValueType>
-class Indicator_EMA
-    : public Indicator<MoneyType, VolumeType, ValueType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class Indicator_EMA : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
@@ -39,7 +37,7 @@ class Indicator_EMA
 
     BaseIndicatorDataT* pPre = NULL;
     for (int i = 0; i < m_avgTimes; ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(EMA_PRICE, cd.close);
       pDat->set(EMA_EMA, -1);
@@ -47,7 +45,7 @@ class Indicator_EMA
     }
 
     for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(EMA_PRICE, cd.close);
       if (pPre->get(EMA_EMA) == -1) {
@@ -66,11 +64,22 @@ class Indicator_EMA
 
       pPre = pDat;
     }
+
+    return true;
   }
 
  protected:
   int m_avgTimes;
 };
+
+template <typename MoneyType, typename VolumeType, typename ValueType>
+Indicator<MoneyType, VolumeType, ValueType>* newIndicator_EMA(
+    CandleList<MoneyType, VolumeType>& lstCandle) {
+  typedef Indicator_EMA<MoneyType, VolumeType, ValueType> Indicator_EMAT;
+
+  return new Indicator_EMAT(
+      1, lstCandle, *(getIndicatorDataMgr<ValueType, EMA_VALUE_NUMS>()));
+}
 
 }  // namespace trading
 

@@ -9,10 +9,8 @@ namespace trading {
 
 enum INDICATOR_INDEX_SMA { SMA_PRICE = 0, SMA_SMA, SMA_VALUE_NUMS };
 
-template <typename MoneyType, typename VolumeType,
-          typename ValueType>
-class Indicator_SMA
-    : public Indicator<MoneyType, VolumeType, ValueType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class Indicator_SMA : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
@@ -72,6 +70,15 @@ class Indicator_SMA
  protected:
   int m_avgTimes;
 };
+
+template <typename MoneyType, typename VolumeType, typename ValueType>
+Indicator<MoneyType, VolumeType, ValueType>* newIndicator_SMA(
+    CandleList<MoneyType, VolumeType>& lstCandle) {
+  typedef Indicator_SMA<MoneyType, VolumeType, ValueType> Indicator_SMAT;
+
+  return new Indicator_SMAT(
+      1, lstCandle, *(getIndicatorDataMgr<ValueType, SMA_VALUE_NUMS>()));
+}
 
 }  // namespace trading
 

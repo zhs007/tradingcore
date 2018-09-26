@@ -17,10 +17,8 @@ enum INDICATOR_INDEX_RSI {
   RSI_VALUE_NUMS
 };
 
-template <typename MoneyType, typename VolumeType,
-          typename ValueType>
-class Indicator_RSI
-    : public Indicator<MoneyType, VolumeType, ValueType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
@@ -141,6 +139,15 @@ class Indicator_RSI
  protected:
   int m_avgTimes;
 };
+
+template <typename MoneyType, typename VolumeType, typename ValueType>
+Indicator<MoneyType, VolumeType, ValueType>* newIndicator_RSI(
+    CandleList<MoneyType, VolumeType>& lstCandle) {
+  typedef Indicator_RSI<MoneyType, VolumeType, ValueType> Indicator_RSIT;
+
+  return new Indicator_RSIT(
+      1, lstCandle, *(getIndicatorDataMgr<ValueType, RSI_VALUE_NUMS>()));
+}
 
 }  // namespace trading
 

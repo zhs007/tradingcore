@@ -72,6 +72,8 @@ void testTrader() {
 }
 
 int main() {
+  trading::initInt64();
+
   testLoadCSV("samplecsv/noformat.csv");
   testTrader();
 

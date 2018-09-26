@@ -15,10 +15,8 @@ enum INDICATOR_INDEX_WMA {
   WMA_VALUE_NUMS
 };
 
-template <typename MoneyType, typename VolumeType,
-          typename ValueType>
-class Indicator_WMA
-    : public Indicator<MoneyType, VolumeType, ValueType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
@@ -92,6 +90,15 @@ class Indicator_WMA
   int m_avgTimes;
   ValueType m_denominator;
 };
+
+template <typename MoneyType, typename VolumeType, typename ValueType>
+Indicator<MoneyType, VolumeType, ValueType>* newIndicator_WMA(
+    CandleList<MoneyType, VolumeType>& lstCandle) {
+  typedef Indicator_WMA<MoneyType, VolumeType, ValueType> Indicator_WMAT;
+
+  return new Indicator_WMAT(
+      1, lstCandle, *(getIndicatorDataMgr<ValueType, WMA_VALUE_NUMS>()));
+}
 
 }  // namespace trading
 
