@@ -90,10 +90,10 @@ class ExchangeCategory {
   //   }
   // }
 
-  void addIndicator(const char* name) {
+  void addIndicator(const char* code, const char* name, IndicatorParam& param) {
     auto pMgr = getIndicatorMgr<MoneyType, VolumeType, ValueType>();
 
-    auto pIndicator = pMgr->newIndicator(name, m_lstCandle);
+    auto pIndicator = pMgr->newIndicator(code, param, m_lstCandle);
     if (pIndicator != NULL) {
       pIndicator->build();
 
@@ -287,10 +287,10 @@ class Exchange {
 
   CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
 
-  void addIndicator(const char* name) {
+  void addIndicator(const char* code, const char* name, IndicatorParam& param) {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
-      it->second->addIndicator(name);
+      it->second->addIndicator(code, name, param);
     }
   }
 

@@ -6,6 +6,10 @@
 
 namespace trading {
 
+struct IndicatorParam {
+  int avgTime;
+}; 
+
 template <typename ValueType>
 class BaseIndicatorData {
  public:

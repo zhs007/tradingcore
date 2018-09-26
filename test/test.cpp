@@ -64,7 +64,14 @@ void testTrader() {
   exchange.addCategory("pta1601", "pta");
   exchange.newCategoryConfig("pta", 1, 1);
   exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
-  exchange.addIndicator("sma");
+
+  trading::IndicatorParam param;
+  param.avgTime = 30 * 60;
+
+  exchange.addIndicator("sma", "sma30", param);
+
+  param.avgTime = 60 * 60;
+  exchange.addIndicator("sma", "sma60", param);
 
   trader.addExchange(exchange);
 

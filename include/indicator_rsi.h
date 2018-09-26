@@ -144,11 +144,12 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_RSI(
-    CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
   typedef Indicator_RSI<MoneyType, VolumeType, ValueType> Indicator_RSIT;
 
   return new Indicator_RSIT(
-      1, lstCandle, *(getIndicatorDataMgr<ValueType, RSI_VALUE_NUMS>()));
+      param.avgTime, lstCandle,
+      *(getIndicatorDataMgr<ValueType, RSI_VALUE_NUMS>()));
 }
 
 }  // namespace trading

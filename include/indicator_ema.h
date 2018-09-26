@@ -74,11 +74,12 @@ class Indicator_EMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_EMA(
-    CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
   typedef Indicator_EMA<MoneyType, VolumeType, ValueType> Indicator_EMAT;
 
   return new Indicator_EMAT(
-      1, lstCandle, *(getIndicatorDataMgr<ValueType, EMA_VALUE_NUMS>()));
+      param.avgTime, lstCandle,
+      *(getIndicatorDataMgr<ValueType, EMA_VALUE_NUMS>()));
 }
 
 }  // namespace trading

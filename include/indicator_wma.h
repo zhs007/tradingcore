@@ -95,11 +95,12 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_WMA(
-    CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
   typedef Indicator_WMA<MoneyType, VolumeType, ValueType> Indicator_WMAT;
 
   return new Indicator_WMAT(
-      1, lstCandle, *(getIndicatorDataMgr<ValueType, WMA_VALUE_NUMS>()));
+      param.avgTime, lstCandle,
+      *(getIndicatorDataMgr<ValueType, WMA_VALUE_NUMS>()));
 }
 
 }  // namespace trading

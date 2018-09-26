@@ -74,11 +74,12 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_SMMA(
-    CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
   typedef Indicator_SMMA<MoneyType, VolumeType, ValueType> Indicator_SMMAT;
 
   return new Indicator_SMMAT(
-      1, lstCandle, *(getIndicatorDataMgr<ValueType, SMMA_VALUE_NUMS>()));
+      param.avgTime, lstCandle,
+      *(getIndicatorDataMgr<ValueType, SMMA_VALUE_NUMS>()));
 }
 
 }  // namespace trading
