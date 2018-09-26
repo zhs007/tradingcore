@@ -30,8 +30,8 @@ class IndicatorMgr {
   IndicatorT* newIndicator(const char* name, CandleListT& lstCandle) {
     FuncNewIndicatorMapIter it = m_map.find(name);
     if (it != m_map.end()) {
-      //  FuncNewIndicatorT func = it->second
-      return (*it->second)(lstCandle);
+      FuncNewIndicatorT func = it->second;
+      return func(lstCandle);
     }
 
     return NULL;

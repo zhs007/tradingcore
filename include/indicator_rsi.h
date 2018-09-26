@@ -44,7 +44,7 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
 
     BaseIndicatorDataT* pPre = NULL;
     for (int i = 0; i < m_avgTimes; ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(RSI_PRICE, cd.close);
       pDat->set(RSI_SMMA_U, -1);
@@ -69,7 +69,7 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
 
     if (m_avgTimes == 1) {
       for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
+        const CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
         pDat->set(RSI_PRICE, cd.close);
 
@@ -93,7 +93,7 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
       }
     } else {
       for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-        CandleDataT& cd = this->m_lstCandle.get(i);
+        const CandleDataT& cd = this->m_lstCandle.get(i);
         BaseIndicatorDataT* pDat = this->pushNewData();
         pDat->set(RSI_PRICE, cd.close);
 
@@ -134,6 +134,8 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
         pPre = pDat;
       }
     }
+
+    return true;
   }
 
  protected:

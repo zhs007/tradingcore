@@ -44,7 +44,7 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
     BaseIndicatorDataT* pPre = NULL;
     for (int i = 0; i < m_avgTimes; ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(WMA_PRICE, cd.close);
       pDat->set(WMA_TOTAL, -1);
@@ -55,7 +55,7 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
     }
 
     for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(WMA_PRICE, cd.close);
       if (pPre->get(WMA_WMA) == -1) {
@@ -84,6 +84,8 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
       pPre = pDat;
     }
+
+    return true;
   }
 
  protected:

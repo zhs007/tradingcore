@@ -13,10 +13,10 @@
 
 namespace trading {
 
-template <typename MoneyType, typename VolumeType>
-class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType, ValueType> {
  public:
-  typedef ExchangeCategory<MoneyType, VolumeType> ExchangeCategoryT;
+  typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef Wallet<MoneyType, VolumeType> WalletT;
@@ -39,8 +39,8 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
 
  public:
   virtual void onTick(WalletT& wallet, time_t bt, time_t ct) {
-    for (int i = m_curCandleIndex; i < m_lstCandle.getLength(); ++i) {
-      const CandleDataT& cd = m_lstCandle.get(i);
+    for (int i = m_curCandleIndex; i < this->m_lstCandle.getLength(); ++i) {
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       if (cd.curtime > ct) {
         return;
       }
@@ -65,7 +65,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
 
  public:
   bool loadCandleCSVFile(const char* filename, CSVConfig& cfg) {
-    m_lstCandle.clear();
+    this->m_lstCandle.clear();
 
     CSVFile csv;
     bool loadok = csv.load(filename);
@@ -118,7 +118,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
       double oi = std::stod(strOpenInterest);
       openInterest = oi * cfg.scaleVolume;
 
-      m_lstCandle.push(curtime, open, close, high, low, volume, openInterest);
+      this->m_lstCandle.push(curtime, open, close, high, low, volume, openInterest);
     }
 
     return true;
@@ -199,17 +199,17 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType> {
   }
 
  protected:
-  CandleListT m_lstCandle;
+  // CandleListT m_lstCandle;
   int m_curCandleIndex;
   OrderLogicT& m_orderLogic;
 };
 
-template <typename MoneyType, typename VolumeType>
-class SimExchange : public Exchange<MoneyType, VolumeType> {
+template <typename MoneyType, typename VolumeType, typename ValueType>
+class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
  public:
-  typedef Exchange<MoneyType, VolumeType> ExchangeT;
+  typedef Exchange<MoneyType, VolumeType, ValueType> ExchangeT;
   typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
-  typedef SimExchangeCategory<MoneyType, VolumeType> SimExchangeCategoryT;
+  typedef SimExchangeCategory<MoneyType, VolumeType, ValueType> SimExchangeCategoryT;
   typedef Wallet<MoneyType, VolumeType> WalletT;
 
  public:

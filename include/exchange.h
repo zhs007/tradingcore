@@ -2,7 +2,10 @@
 #define __TRADINGCORE_EXCHANGE_H__
 
 #include <vector>
+#include "candle.h"
 #include "category.h"
+#include "indicator.h"
+#include "indicatormgr.h"
 #include "order.h"
 #include "ordermgr.h"
 #include "trade.h"
@@ -11,7 +14,7 @@
 
 namespace trading {
 
-template <typename MoneyType, typename VolumeType>
+template <typename MoneyType, typename VolumeType, typename ValueType>
 class ExchangeCategory {
  public:
   typedef Wallet<MoneyType, VolumeType> WalletT;
@@ -22,6 +25,9 @@ class ExchangeCategory {
   typedef typename OrderList::iterator OrderListIter;
   typedef Trade<MoneyType, VolumeType> TradeT;
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
+  typedef CandleList<MoneyType, VolumeType> CandleListT;
+  typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
+  typedef std::map<std::string, IndicatorT*> IndicatorMap;
 
  public:
   ExchangeCategory(const char* name, const CategoryConfigT& cfg)
@@ -83,6 +89,17 @@ class ExchangeCategory {
   //     _insSellOrder(pOrder);
   //   }
   // }
+
+  void addIndicator(const char* name) {
+    auto pMgr = getIndicatorMgr<MoneyType, VolumeType, ValueType>();
+
+    auto pIndicator = pMgr->newIndicator(name, m_lstCandle);
+    if (pIndicator != NULL) {
+      pIndicator->build();
+
+      m_mapIndicator[name] = pIndicator;
+    }
+  }
 
  protected:
   // void _deleteOrder(OrderT& order) {
@@ -207,9 +224,12 @@ class ExchangeCategory {
 
   OrderList m_lstOrderBuy;
   OrderList m_lstOrderSell;
+
+  CandleListT m_lstCandle;
+  IndicatorMap m_mapIndicator;
 };
 
-template <typename MoneyType, typename VolumeType>
+template <typename MoneyType, typename VolumeType, typename ValueType>
 class Exchange {
  public:
   typedef Wallet<MoneyType, VolumeType> WalletT;
@@ -218,7 +238,7 @@ class Exchange {
   typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
   typedef std::map<std::string, std::string> CategoryCodeMap;
   typedef typename CategoryCodeMap::iterator CategoryCodeMapIter;
-  typedef ExchangeCategory<MoneyType, VolumeType> ExchangeCategoryT;
+  typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef std::map<std::string, ExchangeCategoryT*> ExchangeCategoryMap;
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
 
@@ -266,6 +286,13 @@ class Exchange {
   const char* getName() const { return m_nameExchange.c_str(); }
 
   CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
+
+  void addIndicator(const char* name) {
+    for (ExchangeCategoryMapIter it = m_mapCategory.begin();
+         it != m_mapCategory.end(); ++it) {
+      it->second->addIndicator(name);
+    }
+  }
 
  protected:
   CategoryMgrT m_mgrCategory;

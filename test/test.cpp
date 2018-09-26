@@ -64,6 +64,7 @@ void testTrader() {
   exchange.addCategory("pta1601", "pta");
   exchange.newCategoryConfig("pta", 1, 1);
   exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
+  exchange.addIndicator("sma");
 
   trader.addExchange(exchange);
 

@@ -36,7 +36,7 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
     BaseIndicatorDataT* pPre = NULL;
     for (int i = 0; i < m_avgTimes; ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(SMMA_PRICE, cd.close);
       pDat->set(SMMA_SMMA, -1);
@@ -44,7 +44,7 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
     }
 
     for (int i = m_avgTimes; i < this->m_lstCandle.getLength(); ++i) {
-      CandleDataT& cd = this->m_lstCandle.get(i);
+      const CandleDataT& cd = this->m_lstCandle.get(i);
       BaseIndicatorDataT* pDat = this->pushNewData();
       pDat->set(SMMA_PRICE, cd.close);
       if (pPre->get(SMMA_SMMA) == -1) {
@@ -64,6 +64,8 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
       pPre = pDat;
     }
+
+    return true;
   }
 
  protected:
