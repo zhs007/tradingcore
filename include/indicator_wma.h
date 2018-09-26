@@ -62,7 +62,7 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
         ValueType tp = 0;
         ValueType tn = 0;
         for (int j = 0; j < m_avgTimes; ++j) {
-          BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
+          const BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
           tp += pCurDat->get(WMA_PRICE);
           tn += pCurDat->get(WMA_PRICE) * (m_avgTimes - j);
         }
@@ -72,7 +72,7 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
         pDat->set(WMA_WMA, pDat->get(WMA_NUMERATOR) / m_denominator);
       } else {
-        BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
+        const BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
 
         pDat->set(WMA_TOTAL, pPre->get(WMA_TOTAL) + pDat->get(WMA_PRICE) -
                                  pCurDat->get(WMA_PRICE));

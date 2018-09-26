@@ -1,6 +1,7 @@
 #ifndef __TRADINGCORE_EXCHANGE_H__
 #define __TRADINGCORE_EXCHANGE_H__
 
+#include <functional>
 #include <vector>
 #include "candle.h"
 #include "category.h"
@@ -25,9 +26,11 @@ class ExchangeCategory {
   typedef typename OrderList::iterator OrderListIter;
   typedef Trade<MoneyType, VolumeType> TradeT;
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
+  typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef std::map<std::string, IndicatorT*> IndicatorMap;
+  typedef typename IndicatorMap::iterator IndicatorMapIter;
 
  public:
   ExchangeCategory(const char* name, const CategoryConfigT& cfg)
@@ -99,6 +102,19 @@ class ExchangeCategory {
 
       m_mapIndicator[name] = pIndicator;
     }
+  }
+
+  IndicatorT* getIndicator(const char* name) {
+    IndicatorMapIter it = m_mapIndicator.find(name);
+    if (it != m_mapIndicator.end()) {
+      return (it->second);
+    }
+
+    return NULL;
+  }
+
+  const CandleDataT* findTimeEx(int& index, time_t ct) const {
+    return m_lstCandle.findTimeEx(index, ct);
   }
 
  protected:
@@ -241,6 +257,7 @@ class Exchange {
   typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef std::map<std::string, ExchangeCategoryT*> ExchangeCategoryMap;
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
+  typedef std::function<void(ExchangeCategoryT&)> FuncForEachECT;
 
  public:
   Exchange(const char* name) : m_nameExchange(name) {}
@@ -291,6 +308,13 @@ class Exchange {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
       it->second->addIndicator(code, name, param);
+    }
+  }
+
+  void forEach(FuncForEachECT func) {
+    for (ExchangeCategoryMapIter it = m_mapCategory.begin();
+         it != m_mapCategory.end(); ++it) {
+      func(*it->second);
     }
   }
 

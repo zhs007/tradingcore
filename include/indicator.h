@@ -17,7 +17,7 @@ class BaseIndicatorData {
   virtual ~BaseIndicatorData() {}
 
  public:
-  virtual ValueType get(int index) = 0;
+  virtual ValueType get(int index) const = 0;
   virtual void set(int index, ValueType val) = 0;
 };
 
@@ -28,7 +28,7 @@ class IndicatorData : public BaseIndicatorData<ValueType> {
   virtual ~IndicatorData() {}
 
  public:
-  virtual ValueType get(int index) {
+  virtual ValueType get(int index) const {
     assert(index >= 0);
     assert(index < ValueNums);
 
@@ -139,7 +139,7 @@ class Indicator {
     m_lst.clear();
   }
 
-  BaseIndicatorDataT* getData(int index) {
+  const BaseIndicatorDataT* getData(int index) const {
     assert(index >= 0);
     assert(index < m_lst.size());
 

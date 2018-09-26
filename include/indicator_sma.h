@@ -51,13 +51,13 @@ class Indicator_SMA : public Indicator<MoneyType, VolumeType, ValueType> {
       if (pPre->get(SMA_SMA) == -1) {
         ValueType tp = 0;
         for (int j = 0; j < m_avgTimes; ++j) {
-          BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
+          const BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
           tp += pCurDat->get(SMA_PRICE);
         }
 
         pDat->set(SMA_SMA, tp / m_avgTimes);
       } else {
-        BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
+        const BaseIndicatorDataT* pCurDat = this->getData(i - m_avgTimes - 1);
         pDat->set(SMA_SMA, pPre->get(SMA_SMA) +
                                pDat->get(SMA_PRICE) / m_avgTimes -
                                pCurDat->get(SMA_PRICE) / m_avgTimes);

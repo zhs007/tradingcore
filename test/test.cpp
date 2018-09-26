@@ -1,4 +1,5 @@
 #include <stdio.h>
+// #include "../include/strategy_dsma.h"
 #include "../include/tradingcore.h"
 
 void testCandle() {
@@ -74,6 +75,10 @@ void testTrader() {
   exchange.addIndicator("sma", "sma60", param);
 
   trader.addExchange(exchange);
+
+  trading::StrategyInt64_DSMA* pDSMA = new trading::StrategyInt64_DSMA();
+  pDSMA->addExchangeCategory("pta1601");
+  trader.addStrategy(pDSMA);
 
   trader.startSimTrade(trading::str2time("2015-04-21 21:01:00"),
                        trading::str2time("2016-01-15 15:00:00"), 60);

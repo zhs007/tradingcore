@@ -51,7 +51,7 @@ class Indicator_EMA : public Indicator<MoneyType, VolumeType, ValueType> {
       if (pPre->get(EMA_EMA) == -1) {
         ValueType tp = 0;
         for (int j = 0; j < m_avgTimes; ++j) {
-          BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
+          const BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
           tp += pCurDat->get(EMA_PRICE);
         }
 

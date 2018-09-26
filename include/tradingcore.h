@@ -16,6 +16,8 @@
 #include "utils.h"
 #include "wallet.h"
 
+#include "strategy_dsma.h"
+
 namespace trading {
 
 typedef CandleData<int64_t, int64_t> CandleDataInt64;
@@ -24,6 +26,8 @@ typedef Trader<int64_t, int64_t, int64_t, int64_t> TraderInt64;
 typedef Exchange<int64_t, int64_t, int64_t> ExchangeInt64;
 typedef Indicator<int64_t, int64_t, int64_t> IndicatorInt64;
 typedef IndicatorMgr<int64_t, int64_t, int64_t> IndicatorMgrInt64;
+
+typedef Strategy_DSMA<int64_t, int64_t, int64_t, int64_t> StrategyInt64_DSMA;
 
 typedef SimExchange<int64_t, int64_t, int64_t> SimExchangeInt64;
 typedef SimExchangeCategory<int64_t, int64_t, int64_t> SimExchangeCategoryInt64;

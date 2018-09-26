@@ -101,7 +101,7 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
           ValueType tu = 0;
           ValueType td = 0;
           for (int j = 0; j < m_avgTimes; ++j) {
-            BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
+            const BaseIndicatorDataT* pCurDat = this->getData(i - j - 1);
             tu += pCurDat->get(RSI_CUR_U);
             td += pCurDat->get(RSI_CUR_D);
           }

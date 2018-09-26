@@ -25,6 +25,8 @@ struct CandleData {
         volume(v),
         openInterest(oi) {}
 
+  bool operator==(time_t ct) const { return curtime == ct; }
+
   bool operator<(const CandleData& cd) const { return curtime < cd.curtime; }
 
   void format() {
@@ -110,6 +112,7 @@ class CandleList {
   typedef CandleData<MoneyType, VolumeType> CandleDataT;
   typedef std::vector<CandleDataT> List;
   typedef typename std::vector<CandleDataT>::iterator ListIter;
+  typedef typename std::vector<CandleDataT>::const_iterator ListConstIter;
 
  public:
   CandleList() : m_offTime(60) {}
@@ -232,6 +235,37 @@ class CandleList {
   const CandleDataT& get(int index) const { return m_lst[index]; }
 
   void clear() { m_lst.clear(); }
+
+  const CandleDataT* findTime(time_t ct) const {
+    ListConstIter it = std::find(m_lst.begin(), m_lst.end(), ct);
+    if (it != m_lst.end()) {
+      return &(*it);
+    }
+
+    return NULL;
+  }
+
+  const CandleDataT* findTimeEx(int& index, time_t ct) const {
+    if (index < 0 || index >= m_lst.size()) {
+      index = 0;
+    }
+
+    int pre = -1;
+
+    for (; index < m_lst.size(); pre = index++) {
+      if (m_lst[index].curtime == ct) {
+        return &(m_lst[index]);
+      } else if (m_lst[index].curtime > ct) {
+        if (pre < 0) {
+          return &(m_lst[index]);
+        }
+
+        // &(m_lst[pre]);
+      }
+    }
+
+    return NULL;
+  }
 
  protected:
   time_t m_offTime;
