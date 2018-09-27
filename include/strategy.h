@@ -32,7 +32,7 @@ class Strategy {
  public:
   virtual void onTick() = 0;
 
-  virtual void onCandle(time_t ct) = 0;
+  virtual void onCandle(int candleIndex) = 0;
 
  public:
   void addExchangeCategory(const char* name) { m_map[name] = NULL; }

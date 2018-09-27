@@ -40,6 +40,11 @@ inline time_t str2time(const char* str) {
   return mktime(&tm);
 }
 
+inline void time2str(char* str, int len, time_t t) {
+  tm* curtm = localtime(&t);
+  strftime(str, len, "%Y-%m-%d %H:%M:%S", curtm);
+}
+
 // Percent
 
 enum PERCENT_TYPE { PERCENT_TYPE_FIXEDPOINT_MILLION = 0 };

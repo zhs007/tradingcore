@@ -14,7 +14,8 @@
 namespace trading {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
-class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType, ValueType> {
+class SimExchangeCategory
+    : public ExchangeCategory<MoneyType, VolumeType, ValueType> {
  public:
   typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef CandleList<MoneyType, VolumeType> CandleListT;
@@ -45,7 +46,7 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType, Value
         return;
       }
 
-      // printf("%ld ", cd.curtime);
+      printf("%d %ld %ld \n", i, cd.curtime, ct);
 
       if (cd.curtime > bt && cd.curtime <= ct) {
         VolumeType lastVol = cd.volume;
@@ -61,6 +62,31 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType, Value
 
       m_curCandleIndex = i;
     }
+  }
+
+  virtual void onCandle(WalletT& wallet, int candleIndex) {
+    assert(candleIndex >= 0 && candleIndex < this->m_lstCandle.getLength());
+
+    const CandleDataT& cd = this->m_lstCandle.get(candleIndex);
+    // if (cd.curtime > ct) {
+    // return;
+    // }
+
+    // printf("%d %ld %ld \n", candleIndex, cd.curtime, ct);
+
+    // if (cd.curtime > bt && cd.curtime <= ct) {
+    VolumeType lastVol = cd.volume;
+
+    if (lastVol > 0) {
+      _procCandleBuyOrderList(cd, lastVol);
+    }
+
+    if (lastVol > 0) {
+      _procCandleSellOrderList(cd, lastVol);
+    }
+    // }
+
+    m_curCandleIndex = candleIndex;
   }
 
  public:
@@ -118,7 +144,8 @@ class SimExchangeCategory : public ExchangeCategory<MoneyType, VolumeType, Value
       double oi = std::stod(strOpenInterest);
       openInterest = oi * cfg.scaleVolume;
 
-      this->m_lstCandle.push(curtime, open, close, high, low, volume, openInterest);
+      this->m_lstCandle.push(curtime, open, close, high, low, volume,
+                             openInterest);
     }
 
     return true;
@@ -209,7 +236,8 @@ class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
  public:
   typedef Exchange<MoneyType, VolumeType, ValueType> ExchangeT;
   typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
-  typedef SimExchangeCategory<MoneyType, VolumeType, ValueType> SimExchangeCategoryT;
+  typedef SimExchangeCategory<MoneyType, VolumeType, ValueType>
+      SimExchangeCategoryT;
   typedef Wallet<MoneyType, VolumeType> WalletT;
 
  public:

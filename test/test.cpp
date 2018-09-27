@@ -85,8 +85,7 @@ void testTrader(trading::ContextInt64* pCtx) {
 
   trader.addStrategy(pDSMA);
 
-  trader.startSimTrade(trading::str2time("2015-04-21 21:01:00"),
-                       trading::str2time("2015-06-22 15:00:00"), 60);
+  trader.startSimTrade();
 }
 
 int main() {

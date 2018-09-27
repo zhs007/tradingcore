@@ -44,6 +44,8 @@ class ExchangeCategory {
  public:
   virtual void onTick(WalletT& wallet, time_t bt, time_t ct) = 0;
 
+  virtual void onCandle(WalletT& wallet, int candleIndex) = 0;
+
   virtual void onNewOrder(OrderT& order, time_t ct) {
     if (order.orderSide == ORDER_BUY) {
       _procBuyOrder(order, ct);
@@ -117,6 +119,13 @@ class ExchangeCategory {
 
   const CandleDataT* findTimeEx(int& index, time_t ct) const {
     return m_lstCandle.findTimeEx(index, ct);
+  }
+
+  int getCandleLength() const { return m_lstCandle.getLength(); }
+
+  const CandleDataT* getCandleData(int index) const {
+    const CandleDataT& cd = m_lstCandle.get(index);
+    return &cd;
   }
 
  protected:
@@ -298,9 +307,29 @@ class Exchange {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
       it->second->onTick(wallet, bt, ct);
-      // it->second->onTick(ct, wallet,
-      //                    getCategoryConfigWithName(it->second->getName()));
     }
+  }
+
+  void onCandle(WalletT& wallet, int candleIndex) {
+    for (ExchangeCategoryMapIter it = m_mapCategory.begin();
+         it != m_mapCategory.end(); ++it) {
+      it->second->onCandle(wallet, candleIndex);
+    }
+  }
+
+  int getCandleLength() {
+    int len = -1;
+    for (ExchangeCategoryMapIter it = m_mapCategory.begin();
+         it != m_mapCategory.end(); ++it) {
+      int cl = it->second->getCandleLength();
+      if (len == -1) {
+        len = cl;
+      }
+
+      assert(len == cl);
+    }
+
+    return len;
   }
 
   const char* getName() const { return m_nameExchange.c_str(); }

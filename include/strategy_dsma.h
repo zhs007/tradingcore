@@ -25,18 +25,19 @@ class Strategy_DSMA
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
 
  public:
-  Strategy_DSMA()
-      : StrategyT(), m_curindex(0), m_fast(NULL), m_slow(NULL), m_preTime(0) {}
+  Strategy_DSMA() : StrategyT(), m_fast(NULL), m_slow(NULL), m_preTime(0) {}
   virtual ~Strategy_DSMA() {}
 
  public:
   virtual void onTick() {}
 
-  virtual void onCandle(time_t ct) {
+  virtual void onCandle(int candleIndex) {
     ExchangeCategoryT* pEC = this->getExchangeCategory(m_mainCategory.c_str());
     if (pEC != NULL) {
-      const CandleDataT* cd = pEC->findTimeEx(m_curindex, ct);
+      const CandleDataT* cd = pEC->getCandleData(candleIndex);
       if (cd != NULL) {
+        time_t ct = cd->curtime;
+
         if (m_fast == NULL) {
           m_fast = pEC->getIndicator(m_nameFast.c_str());
         }
@@ -45,11 +46,12 @@ class Strategy_DSMA
           m_slow = pEC->getIndicator(m_nameSlow.c_str());
         }
 
-        if (m_curindex > 0 && ct - m_preTime > 0 && ct - m_preTime <= 30 * 60) {
-          const BaseIndicatorDataT* pSlow0 = m_slow->getData(m_curindex - 1);
-          const BaseIndicatorDataT* pSlow1 = m_slow->getData(m_curindex);
-          const BaseIndicatorDataT* pFast0 = m_fast->getData(m_curindex - 1);
-          const BaseIndicatorDataT* pFast1 = m_fast->getData(m_curindex);
+        if (candleIndex > 0 && ct - m_preTime > 0 &&
+            ct - m_preTime <= 30 * 60) {
+          const BaseIndicatorDataT* pSlow0 = m_slow->getData(candleIndex - 1);
+          const BaseIndicatorDataT* pSlow1 = m_slow->getData(candleIndex);
+          const BaseIndicatorDataT* pFast0 = m_fast->getData(candleIndex - 1);
+          const BaseIndicatorDataT* pFast1 = m_fast->getData(candleIndex);
 
           ValueType s0, s1, f0, f1;
           s0 = pSlow0->get(SMA_SMA);
@@ -59,15 +61,20 @@ class Strategy_DSMA
 
           if (s0 >= 0 && s1 >= 0 && f0 >= 0 && f1 >= 0) {
             if (s0 < f0 && s1 >= f1) {
-              printf("do up ");
+              char buf[128];
+              time2str(buf, 128, cd->curtime);
+
+              printf("%s do up \n", buf);
             } else if (s0 > f0 && s1 <= f1) {
-              printf("do down");
+              char buf[128];
+              time2str(buf, 128, cd->curtime);
+              printf("%s do down \n", buf);
             }
           }
         }
-      }
 
-      m_preTime = ct;
+        m_preTime = ct;
+      }
     }
   }
 
@@ -88,7 +95,7 @@ class Strategy_DSMA
   IndicatorT* m_fast;
   IndicatorT* m_slow;
 
-  int m_curindex;
+  // int m_curindex;
 
   time_t m_preTime;
   time_t m_safeTimeOff;

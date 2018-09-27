@@ -232,7 +232,12 @@ class CandleList {
 
   int getLength() const { return m_lst.size(); }
 
-  const CandleDataT& get(int index) const { return m_lst[index]; }
+  const CandleDataT& get(int index) const {
+    assert(index >= 0);
+    assert(index < m_lst.size());
+
+    return m_lst[index];
+  }
 
   void clear() { m_lst.clear(); }
 

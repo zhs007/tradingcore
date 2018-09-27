@@ -64,16 +64,30 @@ class Trader {
     }
   }
 
-  void startSimTrade(time_t bt, time_t et, time_t ot) {
-    time_t pt = bt;
-    for (time_t ct = bt; ct <= et; pt = ct, ct += ot) {
+  int getCandleLength() {
+    int len = -1;
+
+    for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
+      int cl = it->second->exchange.getCandleLength();
+      if (len == -1) {
+        len = cl;
+      }
+
+      assert(len == cl);
+    }
+
+    return len;
+  }
+
+  void startSimTrade() {
+    for (int i = 0; i < getCandleLength(); ++i) {
       for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
-        it->second->exchange.onTick(it->second->wallet, pt, ct);
+        it->second->exchange.onCandle(it->second->wallet, i);
       }
 
       for (StrategyListIter it = m_lstStrategy.begin();
            it != m_lstStrategy.end(); ++it) {
-        (*it)->onCandle(ct);
+        (*it)->onCandle(i);
       }
     }
   }
