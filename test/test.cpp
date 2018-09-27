@@ -42,7 +42,7 @@ void testLoadCSV(const char* filename) {
   trading::saveCSVInt64(lstCandle, "output.csv", cfg);
 }
 
-void testTrader() {
+void testTrader(trading::ContextInt64* pCtx) {
   trading::CSVConfig cfg;
   cfg.head.curtime = "__0";
   cfg.head.open = "open";
@@ -67,28 +67,33 @@ void testTrader() {
   exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
 
   trading::IndicatorParam param;
-  param.avgTime = 30 * 60;
+  param.avgTime = 10;
 
-  exchange.addIndicator("sma", "sma30", param);
+  exchange.addIndicator(pCtx->mgrIndicator, "sma", "sma10", param);
 
-  param.avgTime = 60 * 60;
-  exchange.addIndicator("sma", "sma60", param);
+  param.avgTime = 20;
+  exchange.addIndicator(pCtx->mgrIndicator, "sma", "sma20", param);
 
   trader.addExchange(exchange);
 
   trading::StrategyInt64_DSMA* pDSMA = new trading::StrategyInt64_DSMA();
   pDSMA->addExchangeCategory("pta1601");
+  pDSMA->setMainCategory("pta1601");
+  pDSMA->setFastIndicator("sma10");
+  pDSMA->setSlowIndicator("sma20");
+  pDSMA->setSafeTimeOff(30 * 60);
+
   trader.addStrategy(pDSMA);
 
   trader.startSimTrade(trading::str2time("2015-04-21 21:01:00"),
-                       trading::str2time("2016-01-15 15:00:00"), 60);
+                       trading::str2time("2015-06-22 15:00:00"), 60);
 }
 
 int main() {
-  trading::initInt64();
+  trading::ContextInt64* pCtx = trading::initInt64();
 
   testLoadCSV("samplecsv/noformat.csv");
-  testTrader();
+  testTrader(pCtx);
 
   return 0;
 }

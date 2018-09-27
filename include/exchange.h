@@ -31,6 +31,7 @@ class ExchangeCategory {
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef std::map<std::string, IndicatorT*> IndicatorMap;
   typedef typename IndicatorMap::iterator IndicatorMapIter;
+  typedef IndicatorMgr<ValueType, VolumeType, ValueType> IndicatorMgrT;
 
  public:
   ExchangeCategory(const char* name, const CategoryConfigT& cfg)
@@ -93,10 +94,11 @@ class ExchangeCategory {
   //   }
   // }
 
-  void addIndicator(const char* code, const char* name, IndicatorParam& param) {
-    auto pMgr = getIndicatorMgr<MoneyType, VolumeType, ValueType>();
+  void addIndicator(IndicatorMgrT& mgr, const char* code, const char* name,
+                    IndicatorParam& param) {
+    // auto pMgr = getIndicatorMgr<MoneyType, VolumeType, ValueType>();
 
-    auto pIndicator = pMgr->newIndicator(code, param, m_lstCandle);
+    auto pIndicator = mgr.newIndicator(code, param, m_lstCandle);
     if (pIndicator != NULL) {
       pIndicator->build();
 
@@ -258,6 +260,7 @@ class Exchange {
   typedef std::map<std::string, ExchangeCategoryT*> ExchangeCategoryMap;
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
   typedef std::function<void(ExchangeCategoryT&)> FuncForEachECT;
+  typedef IndicatorMgr<ValueType, VolumeType, ValueType> IndicatorMgrT;
 
  public:
   Exchange(const char* name) : m_nameExchange(name) {}
@@ -304,10 +307,11 @@ class Exchange {
 
   CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
 
-  void addIndicator(const char* code, const char* name, IndicatorParam& param) {
+  void addIndicator(IndicatorMgrT& mgr, const char* code, const char* name,
+                    IndicatorParam& param) {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
-      it->second->addIndicator(code, name, param);
+      it->second->addIndicator(mgr, code, name, param);
     }
   }
 

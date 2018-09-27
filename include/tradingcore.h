@@ -15,6 +15,7 @@
 #include "trader.h"
 #include "utils.h"
 #include "wallet.h"
+#include "context.h"
 
 #include "strategy_dsma.h"
 
@@ -26,6 +27,7 @@ typedef Trader<int64_t, int64_t, int64_t, int64_t> TraderInt64;
 typedef Exchange<int64_t, int64_t, int64_t> ExchangeInt64;
 typedef Indicator<int64_t, int64_t, int64_t> IndicatorInt64;
 typedef IndicatorMgr<int64_t, int64_t, int64_t> IndicatorMgrInt64;
+typedef Context<int64_t, int64_t, int64_t, int64_t> ContextInt64;
 
 typedef Strategy_DSMA<int64_t, int64_t, int64_t, int64_t> StrategyInt64_DSMA;
 
@@ -33,7 +35,9 @@ typedef SimExchange<int64_t, int64_t, int64_t> SimExchangeInt64;
 typedef SimExchangeCategory<int64_t, int64_t, int64_t> SimExchangeCategoryInt64;
 typedef OrderLogic_Simple2<int64_t, int64_t> OrderLogic_Simple2Int64;
 
-void initInt64();
+ContextInt64* initInt64();
+
+void releaseInt64(ContextInt64* pCtx);
 
 bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
                   CSVConfig& cfg);

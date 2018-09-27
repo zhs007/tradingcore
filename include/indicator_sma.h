@@ -31,7 +31,7 @@ class Indicator_SMA : public Indicator<MoneyType, VolumeType, ValueType> {
  public:
   virtual bool build() {
     assert(m_avgTimes > 1);
-    assert(this->m_lstCandle.getLength() < m_avgTimes);
+    assert(this->m_lstCandle.getLength() > m_avgTimes);
 
     this->clear();
 

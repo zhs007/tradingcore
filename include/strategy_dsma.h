@@ -36,32 +36,33 @@ class Strategy_DSMA
     ExchangeCategoryT* pEC = this->getExchangeCategory(m_mainCategory.c_str());
     if (pEC != NULL) {
       const CandleDataT* cd = pEC->findTimeEx(m_curindex, ct);
+      if (cd != NULL) {
+        if (m_fast == NULL) {
+          m_fast = pEC->getIndicator(m_nameFast.c_str());
+        }
 
-      if (m_fast == NULL) {
-        m_fast = pEC->getIndicator(m_nameFast.c_str());
-      }
+        if (m_slow == NULL) {
+          m_slow = pEC->getIndicator(m_nameSlow.c_str());
+        }
 
-      if (m_slow == NULL) {
-        m_slow = pEC->getIndicator(m_nameSlow.c_str());
-      }
+        if (m_curindex > 0 && ct - m_preTime > 0 && ct - m_preTime <= 30 * 60) {
+          const BaseIndicatorDataT* pSlow0 = m_slow->getData(m_curindex - 1);
+          const BaseIndicatorDataT* pSlow1 = m_slow->getData(m_curindex);
+          const BaseIndicatorDataT* pFast0 = m_fast->getData(m_curindex - 1);
+          const BaseIndicatorDataT* pFast1 = m_fast->getData(m_curindex);
 
-      if (m_curindex > 0 && ct - m_preTime > 0 && ct - m_preTime <= 30 * 60) {
-        const BaseIndicatorDataT* pSlow0 = m_slow->getData(m_curindex - 1);
-        const BaseIndicatorDataT* pSlow1 = m_slow->getData(m_curindex);
-        const BaseIndicatorDataT* pFast0 = m_fast->getData(m_curindex - 1);
-        const BaseIndicatorDataT* pFast1 = m_fast->getData(m_curindex);
+          ValueType s0, s1, f0, f1;
+          s0 = pSlow0->get(SMA_SMA);
+          s1 = pSlow1->get(SMA_SMA);
+          f0 = pFast0->get(SMA_SMA);
+          f1 = pFast1->get(SMA_SMA);
 
-        ValueType s0, s1, f0, f1;
-        s0 = pSlow0->get(SMA_SMA);
-        s1 = pSlow1->get(SMA_SMA);
-        f0 = pFast0->get(SMA_SMA);
-        f1 = pFast1->get(SMA_SMA);
-
-        if (s0 >= 0 && s1 >= 0 && f0 >= 0 && f1 >= 0) {
-          if (s0 < f0 && s1 >= f1) {
-            printf("do up ");
-          } else if (s0 > f0 && s1 <= f1) {
-            printf("do down");
+          if (s0 >= 0 && s1 >= 0 && f0 >= 0 && f1 >= 0) {
+            if (s0 < f0 && s1 >= f1) {
+              printf("do up ");
+            } else if (s0 > f0 && s1 <= f1) {
+              printf("do down");
+            }
           }
         }
       }
