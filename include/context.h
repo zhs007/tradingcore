@@ -2,11 +2,12 @@
 #define __TRADINGCORE_CONTEXT_H__
 
 #include <map>
+// #include "category.h"
 #include "indicator.h"
 #include "indicatormgr.h"
+#include "mulindicatordatamgr.h"
 #include "ordermgr.h"
 #include "trademgr.h"
-#include "mulindicatordatamgr.h"
 
 namespace trading {
 
@@ -17,6 +18,7 @@ struct Context {
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
   typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
   typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
+  // typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
   // typedef BaseIndicatorDataMgr<ValueType> BaseIndicatorDataMgrT;
   // typedef std::map<int, BaseIndicatorDataMgrT*> BaseIndicatorDataMgrMap;
   // typedef
@@ -26,6 +28,7 @@ struct Context {
   TradeMgrT mgrTrade;
   OrderMgrT mgrOrder;
   MulIndicatorDataMgrT mgrIndicatorData;
+  // CategoryMgrT mgrCategory;
   // BaseIndicatorDataMgrMap mapBIDMgr;
 
   // void newIndicatorDataMgr(int valueNums) {

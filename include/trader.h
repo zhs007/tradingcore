@@ -83,6 +83,8 @@ class Trader {
     for (int i = 0; i < getCandleLength(); ++i) {
       for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
         it->second->exchange.onCandle(it->second->wallet, i);
+        MoneyType tv = it->second->wallet.countTotalValue();
+        printf("%lld", tv);
       }
 
       for (StrategyListIter it = m_lstStrategy.begin();

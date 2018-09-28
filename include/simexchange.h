@@ -88,6 +88,8 @@ class SimExchangeCategory
     // }
 
     m_curCandleIndex = candleIndex;
+
+    wallet.chgCategoryPrice(this->getName(), cd.close);
   }
 
  public:

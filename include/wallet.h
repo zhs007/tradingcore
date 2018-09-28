@@ -15,6 +15,7 @@ class Wallet {
   typedef std::map<std::string, CategoryInfoT> CategoryMap;
   typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
+  typedef typename CategoryMap::iterator CategoryMapIter;
 
  public:
   Wallet(CategoryMgrT& mgr)
@@ -22,7 +23,16 @@ class Wallet {
   ~Wallet() {}
 
  public:
-  MoneyType countTotalValue() {}
+  MoneyType countTotalValue() {
+    MoneyType totalvalue = 0;
+    for (CategoryMapIter it = m_mapCategory.begin(); it != m_mapCategory.end();
+         ++it) {
+      totalvalue += m_mgr.countCategoryValue(
+          it->second.code.c_str(), it->second.vol, it->second.curPrice);
+    }
+
+    return totalvalue;
+  }
 
   void setMoney(MoneyType money) { m_money = money; }
 
@@ -49,6 +59,15 @@ class Wallet {
       }
 
       ci.chgVolume(*pCfg, curprice, off);
+    }
+  }
+
+  void chgCategoryPrice(const char* name, MoneyType curprice) {
+    CategoryMapIter it = m_mapCategory.find(name);
+    if (it != m_mapCategory.end()) {
+      CategoryInfoT& ci = it->second;
+
+      ci.curPrice = curprice;
     }
   }
 

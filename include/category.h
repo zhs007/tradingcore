@@ -163,6 +163,8 @@ struct CategoryInfo {
   VolumeType vol;
   MoneyType avgPrice;
 
+  MoneyType curPrice;
+
   void chgVolume(CategoryConfigT& cfg, MoneyType price, VolumeType off) {
     AvgPriceResultT ap = cfg.countAvgPriceEx(avgPrice, vol, price, off);
 
@@ -208,17 +210,20 @@ class CategoryMgr {
   typedef std::pair<std::string, CategoryConfigT> CategoryConfigPair;
   typedef std::map<std::string, CategoryConfigT> CategoryConfigMap;
   typedef typename CategoryConfigMap::iterator CategoryConfigMapIterT;
-  typedef typename CategoryConfigMap::const_iterator CategoryConfigMapConstIterT;
+  typedef
+      typename CategoryConfigMap::const_iterator CategoryConfigMapConstIterT;
 
  public:
   CategoryMgr() {}
   ~CategoryMgr() {}
 
  public:
-  MoneyType countCategoryValue(const char* code, VolumeType vol) const {
-    if (m_map.has(code)) {
-      const CategoryConfigT& cfg = m_map[code];
-      return cfg.countValue(vol);
+  MoneyType countCategoryValue(const char* code, VolumeType vol,
+                               MoneyType price) const {
+    CategoryConfigMapConstIterT it = m_map.find(code);
+    if (it != m_map.end()) {
+      const CategoryConfigT& cfg = (it->second);
+      return cfg.countValueEx(vol, price);
     }
 
     return 0;
