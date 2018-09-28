@@ -23,7 +23,7 @@ class OrderLogic {
 
  public:
   virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
-                          const CandleDataT& candle, VolumeType& lastVol) = 0;
+                          const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) = 0;
 
  protected:
 };
@@ -42,35 +42,37 @@ class OrderLogic_Simple : public OrderLogic<MoneyType, VolumeType> {
 
  public:
   virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
-                          const CandleDataT& candle, VolumeType& lastVol) {
+                          const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     if (order.side == ORDER_BUY) {
-      _procCandleBuyOrder(cfg, order, candle, lastVol);
+      _procCandleBuyOrder(cfg, order, candle, lastVol, curPrice);
     } else {
-      _procCandleSellOrder(cfg, order, candle, lastVol);
+      _procCandleSellOrder(cfg, order, candle, lastVol, curPrice);
     }
   }
 
   void _procCandleBuyOrder(const CategoryConfigT& cfg, OrderT& order,
-                           const CandleDataT& candle, VolumeType& lastVol) {
+                           const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     assert(order.side == ORDER_BUY);
 
     if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
-      VolumeType vol = std::min(order.curVolume, lastVol);
+      VolumeType vol = std::min(order.lastVolume, lastVol);
 
       order.procTransaction(cfg, order.destPrice, vol);
+      curPrice = order.destPrice;
 
       lastVol -= vol;
     }
   }
 
   void _procCandleSellOrder(const CategoryConfigT& cfg, OrderT& order,
-                            const CandleDataT& candle, VolumeType& lastVol) {
+                            const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     assert(order.side == ORDER_SELL);
 
     if (order.destPrice >= candle.low && order.destPrice <= candle.high) {
-      VolumeType vol = std::min(order.curVolume, lastVol);
+      VolumeType vol = std::min(order.lastVolume, lastVol);
 
       order.procTransaction(cfg, order.destPrice, vol);
+      curPrice = order.destPrice;
 
       lastVol -= vol;
     }
@@ -93,37 +95,39 @@ class OrderLogic_Simple2 : public OrderLogic<MoneyType, VolumeType> {
 
  public:
   virtual void procCandle(const CategoryConfigT& cfg, OrderT& order,
-                          const CandleDataT& candle, VolumeType& lastVol) {
+                          const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     if (order.orderSide == ORDER_BUY) {
-      _procCandleBuyOrder(cfg, order, candle, lastVol);
+      _procCandleBuyOrder(cfg, order, candle, lastVol, curPrice);
     } else {
-      _procCandleSellOrder(cfg, order, candle, lastVol);
+      _procCandleSellOrder(cfg, order, candle, lastVol, curPrice);
     }
   }
 
   void _procCandleBuyOrder(const CategoryConfigT& cfg, OrderT& order,
-                           const CandleDataT& candle, VolumeType& lastVol) {
+                           const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     assert(order.orderSide == ORDER_BUY);
 
     if (order.destPrice >= candle.close) {
       MoneyType price = std::min(order.destPrice, candle.close);
-      VolumeType vol = std::min(order.curVolume, lastVol);
+      VolumeType vol = std::min(order.lastVolume, lastVol);
 
       order.procTransaction(cfg, price, vol);
+      curPrice = price;
 
       lastVol -= vol;
     }
   }
 
   void _procCandleSellOrder(const CategoryConfigT& cfg, OrderT& order,
-                            const CandleDataT& candle, VolumeType& lastVol) {
+                            const CandleDataT& candle, VolumeType& lastVol, MoneyType& curPrice) {
     assert(order.orderSide == ORDER_SELL);
 
     if (order.destPrice <= candle.close) {
       MoneyType price = std::max(order.destPrice, candle.close);
-      VolumeType vol = std::min(order.curVolume, lastVol);
+      VolumeType vol = std::min(order.lastVolume, lastVol);
 
       order.procTransaction(cfg, order.destPrice, vol);
+      curPrice = price;
 
       lastVol -= vol;
     }

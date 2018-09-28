@@ -39,6 +39,34 @@ class MulIndicatorDataMgr {
     switch (valueNums) {
       case 1:
         return new IndicatorDataMgrT_1();
+      case 2:
+        return new IndicatorDataMgrT_2();
+      case 3:
+        return new IndicatorDataMgrT_3();
+      case 4:
+        return new IndicatorDataMgrT_4();
+      case 5:
+        return new IndicatorDataMgrT_5();
+      case 6:
+        return new IndicatorDataMgrT_6();
+      case 7:
+        return new IndicatorDataMgrT_7();
+      case 8:
+        return new IndicatorDataMgrT_8();
+      case 9:
+        return new IndicatorDataMgrT_9();
+      case 10:
+        return new IndicatorDataMgrT_10();
+      case 11:
+        return new IndicatorDataMgrT_11();
+      case 12:
+        return new IndicatorDataMgrT_12();
+      case 13:
+        return new IndicatorDataMgrT_13();
+      case 14:
+        return new IndicatorDataMgrT_14();
+      case 15:
+        return new IndicatorDataMgrT_15();
       default:
         assert(false);
     }

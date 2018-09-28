@@ -30,6 +30,8 @@ class TradeMgr {
 
     m_map.insert(p);
 
+    printf("new trade %lld\n", p.first);
+
     return m_map[p.first];
   }
 

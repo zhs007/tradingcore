@@ -30,6 +30,8 @@ class OrderMgr {
 
     m_map.insert(p);
 
+    printf("new order %lld\n", p.first);
+
     return m_map[p.first];
   }
 

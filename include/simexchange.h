@@ -193,9 +193,28 @@ class SimExchangeCategory
       off = 1;
       OrderT* pOrder = this->m_lstOrderBuy[i];
 
-      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol);
+      MoneyType curp = -1;
+      VolumeType bv = lastVol;
+      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol,
+                              curp);
+      if (lastVol < bv) {
+        assert(curp > 0);
+        TradeT& trade = this->_newTrade();
+        // use dest price
+        trade.price = curp;
 
-      if (pOrder->curVolume <= 0) {
+        // use min vol
+        trade.vol = bv - lastVol;
+
+        trade.tradeSide = TRADE_BUY;
+
+        trade.buyOrderID = pOrder->orderID;
+        trade.sellOrderID = 0;
+
+        pOrder->lstTrade.push_back(trade);
+      }
+
+      if (pOrder->lastVolume <= 0) {
         this->_deleteOrder(pOrder->orderID, pOrder->orderSide);
         off = 0;
       }
@@ -213,9 +232,28 @@ class SimExchangeCategory
       off = 1;
       OrderT* pOrder = this->m_lstOrderSell[i];
 
-      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol);
+      MoneyType curp = -1;
+      VolumeType bv = lastVol;
+      m_orderLogic.procCandle(this->m_cfgCategory, *pOrder, candle, lastVol,
+                              curp);
+      if (lastVol < bv) {
+        assert(curp > 0);
+        TradeT& trade = this->_newTrade();
+        // use dest price
+        trade.price = curp;
 
-      if (pOrder->curVolume <= 0) {
+        // use min vol
+        trade.vol = bv - lastVol;
+
+        trade.tradeSide = TRADE_SELL;
+
+        trade.sellOrderID = pOrder->orderID;
+        trade.buyOrderID = 0;
+
+        pOrder->lstTrade.push_back(trade);
+      }
+
+      if (pOrder->lastVolume <= 0) {
         this->_deleteOrder(pOrder->orderID, pOrder->orderSide);
         off = 0;
       }

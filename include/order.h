@@ -33,31 +33,45 @@ struct Order {
   time_t bt;
 
   MoneyType avgPrice;
-  VolumeType curVolume;  // must >= 0
+  VolumeType lastVolume;  // must >= 0
   time_t ct;
 
   TradeList lstTrade;
 
+  void setLimitOrder(ORDER_SIDE side, MoneyType price, VolumeType volume, time_t t) {
+    orderType = ORDER_LIMIT;
+    orderSide = side;
+    destPrice = price;
+    destVolume = volume;
+
+    bt = t;
+
+    avgPrice = 0;
+    lastVolume = volume;
+    ct = t;
+    lstTrade.clear();
+  }
+
   // vol > 0
   void procTransaction(const CategoryConfigT& cfg, MoneyType price, VolumeType vol) {
     assert(vol > 0);
-    assert(vol <= curVolume);
-    assert(destVolume >= curVolume);
+    assert(vol <= lastVolume);
+    assert(destVolume >= lastVolume);
 
     if (orderSide == ORDER_BUY) {
       assert(price <= destPrice);
 
       AvgPriceResultT ap =
-          cfg.countAvgPriceEx(avgPrice, destVolume - curVolume, price, vol);
+          cfg.countAvgPriceEx(avgPrice, destVolume - lastVolume, price, vol);
       avgPrice = ap.avgPrice;
-      curVolume = ap.lastVolume;
+      lastVolume -= std::abs(ap.lastVolume);
     } else {
       assert(price >= destPrice);
 
       AvgPriceResultT ap =
-          cfg.countAvgPriceEx(avgPrice, -(destVolume - curVolume), price, -vol);
+          cfg.countAvgPriceEx(avgPrice, -(destVolume - lastVolume), price, -vol);
       avgPrice = ap.avgPrice;
-      curVolume = std::abs(ap.lastVolume);
+      lastVolume -= std::abs(ap.lastVolume);
     }
   }
 };

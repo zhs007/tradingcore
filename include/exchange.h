@@ -52,14 +52,14 @@ class ExchangeCategory {
   virtual void onNewOrder(OrderT& order, time_t ct) {
     if (order.orderSide == ORDER_BUY) {
       _procBuyOrder(order, ct);
-      if (order.curVolume > 0) {
+      if (order.lastVolume > 0) {
         _insBuyOrder(order);
       }
 
     } else {
       _procSellOrder(order, ct);
-      if (order.curVolume > 0) {
-        _insBuyOrder(order);
+      if (order.lastVolume > 0) {
+        _insSellOrder(order);
       }
     }
   }
@@ -67,7 +67,29 @@ class ExchangeCategory {
  public:
   const char* getName() const { return m_nameCategory.c_str(); }
 
-  void newOrder(OrderT& order, time_t ct) { onNewOrder(order, ct); }
+  // OrderT* newOrder(time_t ct) {
+  //   OrderT* pOrder = m_mgrOrder.newOrder();
+  //   pOrder->ct = ct;
+  //   return pOrder;
+  // }
+
+  void newLimitOrder(ORDER_SIDE side, MoneyType price, VolumeType volume,
+                     time_t t) {
+    OrderT& order = m_mgrOrder.newOrder();
+    order.setLimitOrder(side, price, volume, t);
+
+    onNewOrder(order, t);
+  }
+
+  void clearOrder(ORDER_SIDE side) {
+    if (side == ORDER_BUY) {
+      m_lstOrderBuy.clear();
+    } else {
+      m_lstOrderSell.clear();
+    }
+  }
+
+  // void addOrder(OrderT& order) { onNewOrder(order, order.ct); }
 
   // do not in foreach iterator!!!
   void _deleteOrder(OrderID orderID, ORDER_SIDE side) {
@@ -159,7 +181,7 @@ class ExchangeCategory {
     for (OrderListIter it = m_lstOrderSell.begin(); it != m_lstOrderSell.end();
          ++it) {
       if (order.destPrice < (*it)->destPrice) {
-        m_lstOrderSell.insert(&order);
+        m_lstOrderSell.insert(it, &order);
 
         return;
       }
@@ -176,13 +198,13 @@ class ExchangeCategory {
       if (order.destPrice >= (*it)->destPrice) {
         _procTransaction(order, **it, ct);
 
-        if ((*it)->curVolume <= 0) {
+        if ((*it)->lastVolume <= 0) {
           it = m_lstOrderSell.erase(it);
         } else {
           ++it;
         }
 
-        if (order.curVolume <= 0) {
+        if (order.lastVolume <= 0) {
           return;
         }
       } else {
@@ -198,13 +220,13 @@ class ExchangeCategory {
       if (order.destPrice <= (*it)->destPrice) {
         _procTransaction(order, **it, ct);
 
-        if ((*it)->curVolume <= 0) {
+        if ((*it)->lastVolume <= 0) {
           it = m_lstOrderBuy.erase(it);
         } else {
           ++it;
         }
 
-        if (order.curVolume <= 0) {
+        if (order.lastVolume <= 0) {
           return;
         }
       } else {
@@ -215,8 +237,8 @@ class ExchangeCategory {
 
   void _procTransaction(OrderT& src, OrderT& dest, time_t ct) {
     assert(src.orderSide != dest.orderSide);
-    assert(src.curVolume > 0);
-    assert(dest.curVolume > 0);
+    assert(src.lastVolume > 0);
+    assert(dest.lastVolume > 0);
 
     TradeT& trade = _newTrade();
 
@@ -224,7 +246,7 @@ class ExchangeCategory {
     trade.price = dest.destPrice;
 
     // use min vol
-    trade.vol = std::min(src.curVolume, dest.curVolume);
+    trade.vol = std::min(src.lastVolume, dest.lastVolume);
 
     // use src side
     if (src.orderSide == ORDER_BUY) {
@@ -241,6 +263,9 @@ class ExchangeCategory {
 
     src.procTransaction(m_cfgCategory, trade.price, trade.vol);
     dest.procTransaction(m_cfgCategory, trade.price, trade.vol);
+
+    src.lstTrade.push_back(trade);
+    dest.lstTrade.push_back(trade);
 
     trade.ct = ct;
   }
