@@ -47,14 +47,14 @@ class OrderMgr {
   OrderMap m_map;
 };
 
-template <typename MoneyType, typename VolumeType>
-static OrderMgr<MoneyType, VolumeType>* getOrderMgr() {
-  typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
+// template <typename MoneyType, typename VolumeType>
+// static OrderMgr<MoneyType, VolumeType>* getOrderMgr() {
+//   typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
 
-  static OrderMgrT* pMgr = new OrderMgrT();
+//   static OrderMgrT* pMgr = new OrderMgrT();
 
-  return pMgr;
-}
+//   return pMgr;
+// }
 
 }  // namespace trading
 

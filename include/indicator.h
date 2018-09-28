@@ -8,7 +8,7 @@ namespace trading {
 
 struct IndicatorParam {
   int avgTime;
-}; 
+};
 
 template <typename ValueType>
 class BaseIndicatorData {
@@ -94,15 +94,14 @@ class IndicatorDataMgr : public BaseIndicatorDataMgr<ValueType> {
   List m_lst;
 };
 
-template <typename ValueType, int ValueNums>
-static IndicatorDataMgr<ValueType, ValueNums>* getIndicatorDataMgr() {
-  typedef IndicatorDataMgr<ValueType, ValueNums> IndicatorDataMgrT;
-  static IndicatorDataMgrT* pMgr = new IndicatorDataMgrT();
-  return pMgr;
-}
+// template <typename ValueType, int ValueNums>
+// IndicatorDataMgr<ValueType, ValueNums>* newIndicatorDataMgr(void) {
+//   typedef IndicatorDataMgr<ValueType, ValueNums> IndicatorDataMgrT;
+//   IndicatorDataMgrT* pMgr = new IndicatorDataMgrT();
+//   return pMgr;
+// }
 
-template <typename MoneyType, typename VolumeType,
-          typename ValueType>
+template <typename MoneyType, typename VolumeType, typename ValueType>
 class Indicator {
  public:
   typedef CandleList<MoneyType, VolumeType> CandleListT;

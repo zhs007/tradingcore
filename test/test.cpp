@@ -64,15 +64,18 @@ void testTrader(trading::ContextInt64* pCtx) {
 
   exchange.addCategory("pta1601", "pta");
   exchange.newCategoryConfig("pta", 1, 1);
-  exchange.addSimExchangeCategory("pta", "pta1601", "samplecsv/TA601.csv", cfg);
+  exchange.addSimExchangeCategory(pCtx->mgrOrder, pCtx->mgrTrade, "pta",
+                                  "pta1601", "samplecsv/TA601.csv", cfg);
 
   trading::IndicatorParam param;
   param.avgTime = 10;
 
-  exchange.addIndicator(pCtx->mgrIndicator, "sma", "sma10", param);
+  exchange.addIndicator(pCtx->mgrIndicatorData, pCtx->mgrIndicator, "sma",
+                        "sma10", param);
 
   param.avgTime = 20;
-  exchange.addIndicator(pCtx->mgrIndicator, "sma", "sma20", param);
+  exchange.addIndicator(pCtx->mgrIndicatorData, pCtx->mgrIndicator, "sma",
+                        "sma20", param);
 
   trader.addExchange(exchange);
 

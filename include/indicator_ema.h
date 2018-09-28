@@ -2,6 +2,7 @@
 #define __TRADINGCORE_INDICATOR_EMA_H__
 
 #include "indicator.h"
+#include "mulindicatordatamgr.h"
 
 //!! https://en.wikipedia.org/wiki/Moving_average
 
@@ -17,10 +18,11 @@ class Indicator_EMA : public Indicator<MoneyType, VolumeType, ValueType> {
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, EMA_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
+  typedef BaseIndicatorDataMgr<ValueType> BaseIndicatorDataMgrT;
 
  public:
   Indicator_EMA(int avgtimes, CandleListT& lstCandle,
-                IndicatorDataMgrT& mgrIndicatorData)
+                BaseIndicatorDataMgrT& mgrIndicatorData)
       : IndicatorT(lstCandle, mgrIndicatorData), m_avgTimes(avgtimes) {
     if (m_avgTimes <= 0) {
       m_avgTimes = 1;
@@ -74,12 +76,13 @@ class Indicator_EMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_EMA(
-    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle,
+    MulIndicatorDataMgr<ValueType>& mgrIndicatorData) {
   typedef Indicator_EMA<MoneyType, VolumeType, ValueType> Indicator_EMAT;
 
   return new Indicator_EMAT(
       param.avgTime, lstCandle,
-      *(getIndicatorDataMgr<ValueType, EMA_VALUE_NUMS>()));
+      *mgrIndicatorData.getIndicatorDataMgr(EMA_VALUE_NUMS));
 }
 
 }  // namespace trading

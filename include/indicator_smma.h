@@ -2,6 +2,7 @@
 #define __TRADINGCORE_INDICATOR_SMMA_H__
 
 #include "indicator.h"
+#include "mulindicatordatamgr.h"
 
 //!! https://en.wikipedia.org/wiki/Moving_average#Modified_moving_average
 
@@ -17,10 +18,11 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, SMMA_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
+  typedef BaseIndicatorDataMgr<ValueType> BaseIndicatorDataMgrT;
 
  public:
   Indicator_SMMA(int avgtimes, CandleListT& lstCandle,
-                 IndicatorDataMgrT& mgrIndicatorData)
+                 BaseIndicatorDataMgrT& mgrIndicatorData)
       : IndicatorT(lstCandle, mgrIndicatorData), m_avgTimes(avgtimes) {
     if (m_avgTimes <= 0) {
       m_avgTimes = 1;
@@ -74,12 +76,13 @@ class Indicator_SMMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_SMMA(
-    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle,
+    MulIndicatorDataMgr<ValueType>& mgrIndicatorData) {
   typedef Indicator_SMMA<MoneyType, VolumeType, ValueType> Indicator_SMMAT;
 
   return new Indicator_SMMAT(
       param.avgTime, lstCandle,
-      *(getIndicatorDataMgr<ValueType, SMMA_VALUE_NUMS>()));
+      *mgrIndicatorData.getIndicatorDataMgr(SMMA_VALUE_NUMS));
 }
 
 }  // namespace trading

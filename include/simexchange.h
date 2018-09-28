@@ -31,9 +31,10 @@ class SimExchangeCategory
   typedef OrderLogic<MoneyType, VolumeType> OrderLogicT;
 
  public:
-  SimExchangeCategory(const char* name, const CategoryConfigT& cfg,
+  SimExchangeCategory(OrderMgrT& mgrOrder, TradeMgrT& mgrTrade,
+                      const char* name, const CategoryConfigT& cfg,
                       OrderLogicT& orderLogic)
-      : ExchangeCategoryT(name, cfg),
+      : ExchangeCategoryT(mgrOrder, mgrTrade, name, cfg),
         m_curCandleIndex(0),
         m_orderLogic(orderLogic) {}
   virtual ~SimExchangeCategory() {}
@@ -239,6 +240,8 @@ class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
   typedef SimExchangeCategory<MoneyType, VolumeType, ValueType>
       SimExchangeCategoryT;
   typedef Wallet<MoneyType, VolumeType> WalletT;
+  typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
+  typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
 
  public:
   SimExchange(const char* name, OrderLogicT& orderLogic)
@@ -246,12 +249,13 @@ class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
   ~SimExchange() {}
 
  public:
-  void addSimExchangeCategory(const char* codeCategory,
+  void addSimExchangeCategory(OrderMgrT& mgrOrder, TradeMgrT& mgrTrade,
+                              const char* codeCategory,
                               const char* nameCategory, const char* filename,
                               CSVConfig& cfg) {
     SimExchangeCategoryT* pSEC = new SimExchangeCategoryT(
-        nameCategory, this->getCategoryConfigWithName(nameCategory),
-        m_orderLogic);
+        mgrOrder, mgrTrade, nameCategory,
+        this->getCategoryConfigWithName(nameCategory), m_orderLogic);
     this->m_mapCategory[nameCategory] = pSEC;
 
     pSEC->loadCandleCSVFile(filename, cfg);

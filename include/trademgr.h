@@ -47,14 +47,14 @@ class TradeMgr {
   TradeMap m_map;
 };
 
-template <typename MoneyType, typename VolumeType>
-static TradeMgr<MoneyType, VolumeType>* getTradeMgr() {
-  typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
+// template <typename MoneyType, typename VolumeType>
+// static TradeMgr<MoneyType, VolumeType>* getTradeMgr() {
+//   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
 
-  static TradeMgrT* pMgr = new TradeMgrT();
+//   static TradeMgrT* pMgr = new TradeMgrT();
 
-  return pMgr;
-}
+//   return pMgr;
+// }
 
 }  // namespace trading
 

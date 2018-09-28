@@ -2,6 +2,7 @@
 #define __TRADINGCORE_INDICATOR_RSI_H__
 
 #include "indicator.h"
+#include "mulindicatordatamgr.h"
 
 //!! https://en.wikipedia.org/wiki/Relative_strength_index
 
@@ -25,10 +26,11 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, RSI_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
+  typedef BaseIndicatorDataMgr<ValueType> BaseIndicatorDataMgrT;
 
  public:
   Indicator_RSI(int avgtimes, CandleListT& lstCandle,
-                IndicatorDataMgrT& mgrIndicatorData)
+                BaseIndicatorDataMgrT& mgrIndicatorData)
       : IndicatorT(lstCandle, mgrIndicatorData), m_avgTimes(avgtimes) {
     if (m_avgTimes <= 0) {
       m_avgTimes = 1;
@@ -144,12 +146,13 @@ class Indicator_RSI : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_RSI(
-    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle,
+    MulIndicatorDataMgr<ValueType>& mgrIndicatorData) {
   typedef Indicator_RSI<MoneyType, VolumeType, ValueType> Indicator_RSIT;
 
   return new Indicator_RSIT(
       param.avgTime, lstCandle,
-      *(getIndicatorDataMgr<ValueType, RSI_VALUE_NUMS>()));
+      *mgrIndicatorData.getIndicatorDataMgr(RSI_VALUE_NUMS));
 }
 
 }  // namespace trading

@@ -2,6 +2,7 @@
 #define __TRADINGCORE_INDICATOR_WMA_H__
 
 #include "indicator.h"
+#include "mulindicatordatamgr.h"
 
 //!! https://en.wikipedia.org/wiki/Moving_average
 
@@ -23,10 +24,11 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef IndicatorDataMgr<ValueType, WMA_VALUE_NUMS> IndicatorDataMgrT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
+  typedef BaseIndicatorDataMgr<ValueType> BaseIndicatorDataMgrT;
 
  public:
   Indicator_WMA(int avgtimes, CandleListT& lstCandle,
-                IndicatorDataMgrT& mgrIndicatorData)
+                BaseIndicatorDataMgrT& mgrIndicatorData)
       : IndicatorT(lstCandle, mgrIndicatorData), m_avgTimes(avgtimes) {
     if (m_avgTimes <= 0) {
       m_avgTimes = 1;
@@ -95,12 +97,13 @@ class Indicator_WMA : public Indicator<MoneyType, VolumeType, ValueType> {
 
 template <typename MoneyType, typename VolumeType, typename ValueType>
 Indicator<MoneyType, VolumeType, ValueType>* newIndicator_WMA(
-    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle) {
+    IndicatorParam& param, CandleList<MoneyType, VolumeType>& lstCandle,
+    MulIndicatorDataMgr<ValueType>& mgrIndicatorData) {
   typedef Indicator_WMA<MoneyType, VolumeType, ValueType> Indicator_WMAT;
 
   return new Indicator_WMAT(
       param.avgTime, lstCandle,
-      *(getIndicatorDataMgr<ValueType, WMA_VALUE_NUMS>()));
+      *mgrIndicatorData.getIndicatorDataMgr(WMA_VALUE_NUMS));
 }
 
 }  // namespace trading

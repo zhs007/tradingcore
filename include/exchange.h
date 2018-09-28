@@ -7,6 +7,7 @@
 #include "category.h"
 #include "indicator.h"
 #include "indicatormgr.h"
+#include "mulindicatordatamgr.h"
 #include "order.h"
 #include "ordermgr.h"
 #include "trade.h"
@@ -32,13 +33,15 @@ class ExchangeCategory {
   typedef std::map<std::string, IndicatorT*> IndicatorMap;
   typedef typename IndicatorMap::iterator IndicatorMapIter;
   typedef IndicatorMgr<ValueType, VolumeType, ValueType> IndicatorMgrT;
+  typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
 
  public:
-  ExchangeCategory(const char* name, const CategoryConfigT& cfg)
+  ExchangeCategory(OrderMgrT& mgrOrder, TradeMgrT& mgrTrade, const char* name,
+                   const CategoryConfigT& cfg)
       : m_nameCategory(name),
-        m_mgrTrade(*(getTradeMgr<MoneyType, VolumeType>())),
+        m_mgrTrade(mgrTrade),
         m_cfgCategory(cfg),
-        m_mgrOrder(*(getOrderMgr<MoneyType, VolumeType>())) {}
+        m_mgrOrder(mgrOrder) {}
   virtual ~ExchangeCategory() {}
 
  public:
@@ -96,11 +99,13 @@ class ExchangeCategory {
   //   }
   // }
 
-  void addIndicator(IndicatorMgrT& mgr, const char* code, const char* name,
+  void addIndicator(MulIndicatorDataMgrT& mgrMulIndicatorData,
+                    IndicatorMgrT& mgr, const char* code, const char* name,
                     IndicatorParam& param) {
     // auto pMgr = getIndicatorMgr<MoneyType, VolumeType, ValueType>();
 
-    auto pIndicator = mgr.newIndicator(code, param, m_lstCandle);
+    auto pIndicator =
+        mgr.newIndicator(mgrMulIndicatorData, code, param, m_lstCandle);
     if (pIndicator != NULL) {
       pIndicator->build();
 
@@ -270,6 +275,7 @@ class Exchange {
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
   typedef std::function<void(ExchangeCategoryT&)> FuncForEachECT;
   typedef IndicatorMgr<ValueType, VolumeType, ValueType> IndicatorMgrT;
+  typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
 
  public:
   Exchange(const char* name) : m_nameExchange(name) {}
@@ -336,11 +342,12 @@ class Exchange {
 
   CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
 
-  void addIndicator(IndicatorMgrT& mgr, const char* code, const char* name,
+  void addIndicator(MulIndicatorDataMgrT& mgrMulIndicatorData,
+                    IndicatorMgrT& mgr, const char* code, const char* name,
                     IndicatorParam& param) {
     for (ExchangeCategoryMapIter it = m_mapCategory.begin();
          it != m_mapCategory.end(); ++it) {
-      it->second->addIndicator(mgr, code, name, param);
+      it->second->addIndicator(mgrMulIndicatorData, mgr, code, name, param);
     }
   }
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include "candle.h"
 #include "indicator.h"
+#include "mulindicatordatamgr.h"
 
 namespace trading {
 
@@ -14,8 +15,10 @@ class IndicatorMgr {
  public:
   typedef CandleList<MoneyType, VolumeType> CandleListT;
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
+  typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
   typedef std::function<IndicatorT*(IndicatorParam& param,
-                                    CandleListT& lstCandle)>
+                                    CandleListT& lstCandle,
+                                    MulIndicatorDataMgrT& mgrIndicatorDataMgr)>
       FuncNewIndicatorT;
   typedef std::map<std::string, FuncNewIndicatorT> FuncNewIndicatorMap;
   typedef typename FuncNewIndicatorMap::iterator FuncNewIndicatorMapIter;
@@ -29,12 +32,12 @@ class IndicatorMgr {
     m_map[name] = funcNew;
   }
 
-  IndicatorT* newIndicator(const char* name, IndicatorParam& param,
+  IndicatorT* newIndicator(MulIndicatorDataMgrT& mgr, const char* name, IndicatorParam& param,
                            CandleListT& lstCandle) {
     FuncNewIndicatorMapIter it = m_map.find(name);
     if (it != m_map.end()) {
       FuncNewIndicatorT func = it->second;
-      return func(param, lstCandle);
+      return func(param, lstCandle, mgr);
     }
 
     return NULL;
