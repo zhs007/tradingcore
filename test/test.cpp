@@ -57,15 +57,15 @@ void testTrader(trading::ContextInt64* pCtx) {
   cfg.timeType = trading::CSVTIME_FORMAT_STR;
 
   trading::OrderLogic_Simple2Int64 orderlogic;
-  trading::TraderInt64 trader;
-  trading::SimExchangeInt64 exchange("zss", orderlogic);
+  trading::TraderInt64 trader(pCtx->mgrCategory);
+  trading::SimExchangeInt64 exchange(pCtx->mgrCategory, "zss", orderlogic);
   // trading::SimExchangeCategoryInt64 pta1601("pta1601",
   // exchange.getCategoryConfigWithName("pta"), orderlogic);
 
-  exchange.addCategory("pta1601", "pta");
-  exchange.newCategoryConfig("pta", 1, 1);
-  exchange.addSimExchangeCategory(pCtx->mgrOrder, pCtx->mgrTrade, "pta",
-                                  "pta1601", "samplecsv/TA601.csv", cfg);
+  // exchange.addCategory("pta1601", "pta");
+  exchange.newCategoryConfig("pta1601", 1, 1);
+  exchange.addSimExchangeCategory(pCtx->mgrOrder, pCtx->mgrTrade, "pta1601",
+                                  "samplecsv/TA601.csv", cfg);
 
   trading::IndicatorParam param;
   param.avgTime = 10;

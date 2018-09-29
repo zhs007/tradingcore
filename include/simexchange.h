@@ -282,21 +282,22 @@ class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
   typedef Wallet<MoneyType, VolumeType> WalletT;
   typedef TradeMgr<MoneyType, VolumeType> TradeMgrT;
   typedef OrderMgr<MoneyType, VolumeType> OrderMgrT;
+  typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
 
  public:
-  SimExchange(const char* name, OrderLogicT& orderLogic)
-      : ExchangeT(name), m_orderLogic(orderLogic) {}
+  SimExchange(CategoryMgrT& mgrCategory, const char* name,
+              OrderLogicT& orderLogic)
+      : ExchangeT(mgrCategory, name), m_orderLogic(orderLogic) {}
   ~SimExchange() {}
 
  public:
   void addSimExchangeCategory(OrderMgrT& mgrOrder, TradeMgrT& mgrTrade,
-                              const char* codeCategory,
-                              const char* nameCategory, const char* filename,
+                              const char* codeCategory, const char* filename,
                               CSVConfig& cfg) {
     SimExchangeCategoryT* pSEC = new SimExchangeCategoryT(
-        mgrOrder, mgrTrade, nameCategory,
-        this->getCategoryConfigWithName(nameCategory), m_orderLogic);
-    this->m_mapCategory[nameCategory] = pSEC;
+        mgrOrder, mgrTrade, codeCategory, this->getCategoryConfig(codeCategory),
+        m_orderLogic);
+    this->m_mapCategory[codeCategory] = pSEC;
 
     pSEC->loadCandleCSVFile(filename, cfg);
   }

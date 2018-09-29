@@ -49,15 +49,15 @@ class ExchangeCategory {
 
   virtual void onCandle(WalletT& wallet, int candleIndex) = 0;
 
-  virtual void onNewOrder(OrderT& order, time_t ct) {
+  virtual void onNewOrder(WalletT& wallet, OrderT& order, time_t ct) {
     if (order.orderSide == ORDER_BUY) {
-      _procBuyOrder(order, ct);
+      _procBuyOrder(wallet, order, ct);
       if (order.lastVolume > 0) {
         _insBuyOrder(order);
       }
 
     } else {
-      _procSellOrder(order, ct);
+      _procSellOrder(wallet, order, ct);
       if (order.lastVolume > 0) {
         _insSellOrder(order);
       }
@@ -73,12 +73,12 @@ class ExchangeCategory {
   //   return pOrder;
   // }
 
-  void newLimitOrder(ORDER_SIDE side, MoneyType price, VolumeType volume,
+  void newLimitOrder(WalletT& wallet, ORDER_SIDE side, MoneyType price, VolumeType volume,
                      time_t t) {
     OrderT& order = m_mgrOrder.newOrder();
     order.setLimitOrder(side, price, volume, t);
 
-    onNewOrder(order, t);
+    onNewOrder(wallet, order, t);
   }
 
   void clearOrder(ORDER_SIDE side) {
@@ -190,13 +190,13 @@ class ExchangeCategory {
     m_lstOrderSell.push_back(&order);
   }
 
-  void _procBuyOrder(OrderT& order, time_t ct) {
+  void _procBuyOrder(WalletT& wallet, OrderT& order, time_t ct) {
     assert(order.orderSide == ORDER_BUY);
 
     for (OrderListIter it = m_lstOrderSell.begin();
          it != m_lstOrderSell.end();) {
       if (order.destPrice >= (*it)->destPrice) {
-        _procTransaction(order, **it, ct);
+        _procTransaction(wallet, order, **it, ct);
 
         if ((*it)->lastVolume <= 0) {
           it = m_lstOrderSell.erase(it);
@@ -213,12 +213,12 @@ class ExchangeCategory {
     }
   }
 
-  void _procSellOrder(OrderT& order, time_t ct) {
+  void _procSellOrder(WalletT& wallet, OrderT& order, time_t ct) {
     assert(order.orderSide == ORDER_SELL);
 
     for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();) {
       if (order.destPrice <= (*it)->destPrice) {
-        _procTransaction(order, **it, ct);
+        _procTransaction(wallet, order, **it, ct);
 
         if ((*it)->lastVolume <= 0) {
           it = m_lstOrderBuy.erase(it);
@@ -235,7 +235,7 @@ class ExchangeCategory {
     }
   }
 
-  void _procTransaction(OrderT& src, OrderT& dest, time_t ct) {
+  void _procTransaction(WalletT& wallet, OrderT& src, OrderT& dest, time_t ct) {
     assert(src.orderSide != dest.orderSide);
     assert(src.lastVolume > 0);
     assert(dest.lastVolume > 0);
@@ -268,9 +268,19 @@ class ExchangeCategory {
     dest.lstTrade.push_back(trade);
 
     trade.ct = ct;
+
+    onTrade(wallet, trade);
   }
 
   TradeT& _newTrade() { return m_mgrTrade.newTrade(); }
+
+  void onTrade(WalletT& wallet, TradeT& trade) {
+    if (trade.tradeSide == TRADE_BUY) {
+      wallet.chgCategoryVolume(m_nameCategory.c_str(), trade.price, trade.vol);
+    } else {
+      wallet.chgCategoryVolume(m_nameCategory.c_str(), trade.price, -trade.vol);
+    }
+  }
 
  protected:
   OrderMgrT& m_mgrOrder;
@@ -293,8 +303,8 @@ class Exchange {
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
   typedef CategoryInfo<MoneyType, VolumeType> CategoryInfoT;
   typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
-  typedef std::map<std::string, std::string> CategoryCodeMap;
-  typedef typename CategoryCodeMap::iterator CategoryCodeMapIter;
+  // typedef std::map<std::string, std::string> CategoryCodeMap;
+  // typedef typename CategoryCodeMap::iterator CategoryCodeMapIter;
   typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef std::map<std::string, ExchangeCategoryT*> ExchangeCategoryMap;
   typedef typename ExchangeCategoryMap::iterator ExchangeCategoryMapIter;
@@ -303,7 +313,7 @@ class Exchange {
   typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
 
  public:
-  Exchange(const char* name) : m_nameExchange(name) {}
+  Exchange(CategoryMgrT& mgrCategory, const char* name) : m_mgrCategory(mgrCategory), m_nameExchange(name) {}
   ~Exchange() {}
 
  public:
@@ -316,15 +326,15 @@ class Exchange {
     return cfg;
   }
 
-  void addCategory(const char* name, const char* code) {
-    m_mapCategoryCode[name] = code;
-  }
+  // void addCategory(const char* name, const char* code) {
+  //   m_mapCategoryCode[name] = code;
+  // }
 
-  const CategoryConfigT& getCategoryConfigWithName(const char* name) {
-    CategoryCodeMapIter it = m_mapCategoryCode.find(name);
-    assert(it != m_mapCategoryCode.end());
+  const CategoryConfigT& getCategoryConfig(const char* code) {
+    // CategoryCodeMapIter it = m_mapCategoryCode.find(name);
+    // assert(it != m_mapCategoryCode.end());
 
-    const CategoryConfigT* pCfg = m_mgrCategory.getConfig(it->second.c_str());
+    const CategoryConfigT* pCfg = m_mgrCategory.getConfig(code);
     assert(pCfg != NULL);
 
     return *pCfg;
@@ -365,7 +375,7 @@ class Exchange {
 
   const char* getName() const { return m_nameExchange.c_str(); }
 
-  CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
+  // CategoryMgrT& getCategoryMgr() { return m_mgrCategory; }
 
   void addIndicator(MulIndicatorDataMgrT& mgrMulIndicatorData,
                     IndicatorMgrT& mgr, const char* code, const char* name,
@@ -384,8 +394,8 @@ class Exchange {
   }
 
  protected:
-  CategoryMgrT m_mgrCategory;
-  CategoryCodeMap m_mapCategoryCode;
+  CategoryMgrT& m_mgrCategory;
+  // CategoryCodeMap m_mapCategoryCode;
   ExchangeCategoryMap m_mapCategory;
   std::string m_nameExchange;
 };

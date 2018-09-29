@@ -23,6 +23,7 @@ class Strategy_DSMA
   typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef Indicator<MoneyType, VolumeType, ValueType> IndicatorT;
   typedef BaseIndicatorData<ValueType> BaseIndicatorDataT;
+  typedef Wallet<MoneyType, VolumeType> WalletT;
 
  public:
   Strategy_DSMA() : StrategyT(), m_fast(NULL), m_slow(NULL), m_preTime(0) {}
@@ -31,7 +32,7 @@ class Strategy_DSMA
  public:
   virtual void onTick() {}
 
-  virtual void onCandle(int candleIndex) {
+  virtual void onCandle(WalletT& wallet, int candleIndex) {
     ExchangeCategoryT* pEC = this->getExchangeCategory(m_mainCategory.c_str());
     if (pEC != NULL) {
       const CandleDataT* cd = pEC->getCandleData(candleIndex);
@@ -65,14 +66,14 @@ class Strategy_DSMA
               time2str(buf, 128, cd->curtime);
 
               pEC->clearOrder(ORDER_SELL);
-              pEC->newLimitOrder(ORDER_BUY, cd->close * 1.1, 100, ct);
+              pEC->newLimitOrder(wallet, ORDER_BUY, cd->close * 1.1, 100, ct);
               printf("%s do up \n", buf);
             } else if (s0 > f0 && s1 <= f1) {
               char buf[128];
               time2str(buf, 128, cd->curtime);
 
               pEC->clearOrder(ORDER_BUY);
-              pEC->newLimitOrder(ORDER_SELL, cd->close * 0.9, 100, ct);
+              pEC->newLimitOrder(wallet, ORDER_SELL, cd->close * 0.9, 100, ct);
               printf("%s do down \n", buf);
             }
           }

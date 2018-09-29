@@ -21,6 +21,7 @@ struct CategoryConfig {
   typedef AvgPriceResult<MoneyType, VolumeType> AvgPriceResultT;
 
   std::string code;
+  std::string codeCategory;
 
   VolumeType unit;
   MoneyType price;
@@ -165,7 +166,7 @@ struct CategoryInfo {
 
   MoneyType curPrice;
 
-  void chgVolume(CategoryConfigT& cfg, MoneyType price, VolumeType off) {
+  void chgVolume(const CategoryConfigT& cfg, MoneyType price, VolumeType off) {
     AvgPriceResultT ap = cfg.countAvgPriceEx(avgPrice, vol, price, off);
 
     vol = ap.lastVolume;

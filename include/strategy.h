@@ -23,6 +23,7 @@ class Strategy {
   typedef std::map<std::string, ExchangeCategoryT*> ExchangeCategoryMap;
   typedef
       typename ExchangeCategoryMap::const_iterator ExchangeCategoryMapConstIter;
+  typedef Wallet<MoneyType, VolumeType> WalletT;
   // typedef Trader<MoneyType, VolumeType, ValueType, PercentType> TraderT;
 
  public:
@@ -32,7 +33,7 @@ class Strategy {
  public:
   virtual void onTick() = 0;
 
-  virtual void onCandle(int candleIndex) = 0;
+  virtual void onCandle(WalletT& wallet, int candleIndex) = 0;
 
  public:
   void addExchangeCategory(const char* name) { m_map[name] = NULL; }

@@ -50,8 +50,9 @@ class Wallet {
   void chgMoney(MoneyType off) { m_money += off; }
 
   void chgCategoryVolume(const char* name, MoneyType curprice, VolumeType off) {
-    if (m_mapCategory.has(name)) {
-      CategoryInfoT& ci = m_mapCategory[name];
+    CategoryMapIter it = m_mapCategory.find(name);
+    if (it != m_mapCategory.end()) {
+      CategoryInfoT& ci = it->second;
 
       const CategoryConfigT* pCfg = m_mgr.getConfig(ci.code.c_str());
       if (pCfg == NULL) {

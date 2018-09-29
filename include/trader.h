@@ -17,11 +17,11 @@ struct TraderExchangeInfo {
   typedef Exchange<MoneyType, VolumeType, ValueType> ExchangeT;
   // typedef PNL<PercentType> PNLT;
 
-  WalletT wallet;
+  // WalletT wallet;
   ExchangeT& exchange;
   // PNLT pnl;
 
-  TraderExchangeInfo(ExchangeT& e) : exchange(e), wallet(e.getCategoryMgr()) {}
+  TraderExchangeInfo(ExchangeT& e) : exchange(e) {}
 };
 
 template <typename MoneyType, typename VolumeType, typename ValueType,
@@ -40,10 +40,12 @@ class Trader {
   typedef typename StrategyList::iterator StrategyListIter;
   typedef ExchangeCategory<MoneyType, VolumeType, ValueType> ExchangeCategoryT;
   typedef std::function<void(ExchangeCategoryT&)> FuncForEachECT;
+  typedef Wallet<MoneyType, VolumeType> WalletT;
+  typedef CategoryMgr<MoneyType, VolumeType> CategoryMgrT;
   // typedef PNL<PercentType> PNLT;
 
  public:
-  Trader() {}
+  Trader(CategoryMgrT& mgr) : m_wallet(mgr) {}
   ~Trader() {}
 
  public:
@@ -82,15 +84,18 @@ class Trader {
   void startSimTrade() {
     for (int i = 0; i < getCandleLength(); ++i) {
       for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
-        it->second->exchange.onCandle(it->second->wallet, i);
-        MoneyType tv = it->second->wallet.countTotalValue();
-        printf("%lld", tv);
+        it->second->exchange.onCandle(m_wallet, i);
+        // MoneyType tv = it->second->wallet.countTotalValue();
+        // printf("%lld", tv);
       }
 
       for (StrategyListIter it = m_lstStrategy.begin();
            it != m_lstStrategy.end(); ++it) {
-        (*it)->onCandle(i);
+        (*it)->onCandle(m_wallet, i);
       }
+
+      MoneyType tv = m_wallet.countTotalValue();
+      printf("%lld \n", tv);
     }
   }
 
@@ -104,6 +109,7 @@ class Trader {
  protected:
   ExchangeMap m_map;
   StrategyList m_lstStrategy;
+  WalletT m_wallet;
   // PNLT m_pnl;
 };
 
