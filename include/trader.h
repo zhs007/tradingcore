@@ -81,6 +81,10 @@ class Trader {
     return len;
   }
 
+  void initCategoryInfo(const char* code, VolumeType vol, MoneyType avgPrice) {
+    m_wallet.initCategoryInfo(code, vol, avgPrice);
+  }
+
   void startSimTrade() {
     for (int i = 0; i < getCandleLength(); ++i) {
       for (ExchangeMapIter it = m_map.begin(); it != m_map.end(); ++it) {

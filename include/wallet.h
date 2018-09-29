@@ -36,10 +36,10 @@ class Wallet {
 
   void setMoney(MoneyType money) { m_money = money; }
 
-  void initCategoryInfo(const char* name, const char* code, VolumeType vol,
+  void initCategoryInfo(const char* code, VolumeType vol,
                         MoneyType avgPrice) {
     CategoryPair p;
-    p.first = name;
+    p.first = code;
     p.second.code = code;
     p.second.vol = vol;
     p.second.avgPrice = avgPrice;
@@ -49,8 +49,8 @@ class Wallet {
 
   void chgMoney(MoneyType off) { m_money += off; }
 
-  void chgCategoryVolume(const char* name, MoneyType curprice, VolumeType off) {
-    CategoryMapIter it = m_mapCategory.find(name);
+  void chgCategoryVolume(const char* code, MoneyType curprice, VolumeType off) {
+    CategoryMapIter it = m_mapCategory.find(code);
     if (it != m_mapCategory.end()) {
       CategoryInfoT& ci = it->second;
 
@@ -63,8 +63,8 @@ class Wallet {
     }
   }
 
-  void chgCategoryPrice(const char* name, MoneyType curprice) {
-    CategoryMapIter it = m_mapCategory.find(name);
+  void chgCategoryPrice(const char* code, MoneyType curprice) {
+    CategoryMapIter it = m_mapCategory.find(code);
     if (it != m_mapCategory.end()) {
       CategoryInfoT& ci = it->second;
 

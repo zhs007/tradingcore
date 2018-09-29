@@ -53,11 +53,11 @@ class SimExchangeCategory
         VolumeType lastVol = cd.volume;
 
         if (lastVol > 0) {
-          _procCandleBuyOrderList(cd, lastVol);
+          _procCandleBuyOrderList(wallet, cd, lastVol);
         }
 
         if (lastVol > 0) {
-          _procCandleSellOrderList(cd, lastVol);
+          _procCandleSellOrderList(wallet, cd, lastVol);
         }
       }
 
@@ -79,11 +79,11 @@ class SimExchangeCategory
     VolumeType lastVol = cd.volume;
 
     if (lastVol > 0) {
-      _procCandleBuyOrderList(cd, lastVol);
+      _procCandleBuyOrderList(wallet, cd, lastVol);
     }
 
     if (lastVol > 0) {
-      _procCandleSellOrderList(cd, lastVol);
+      _procCandleSellOrderList(wallet, cd, lastVol);
     }
     // }
 
@@ -189,7 +189,8 @@ class SimExchangeCategory
   //   }
   // }
 
-  void _procCandleBuyOrderList(const CandleDataT& candle, VolumeType& lastVol) {
+  void _procCandleBuyOrderList(WalletT& wallet, const CandleDataT& candle,
+                               VolumeType& lastVol) {
     int off = 1;
     for (int i = 0; i < this->m_lstOrderBuy.size(); i += off) {
       off = 1;
@@ -214,6 +215,8 @@ class SimExchangeCategory
         trade.sellOrderID = 0;
 
         pOrder->lstTrade.push_back(trade);
+
+        this->onTrade(wallet, trade);
       }
 
       if (pOrder->lastVolume <= 0) {
@@ -227,7 +230,7 @@ class SimExchangeCategory
     }
   }
 
-  void _procCandleSellOrderList(const CandleDataT& candle,
+  void _procCandleSellOrderList(WalletT& wallet, const CandleDataT& candle,
                                 VolumeType& lastVol) {
     int off = 1;
     for (int i = 0; i < this->m_lstOrderSell.size(); i += off) {
@@ -253,6 +256,8 @@ class SimExchangeCategory
         trade.buyOrderID = 0;
 
         pOrder->lstTrade.push_back(trade);
+
+        this->onTrade(wallet, trade);
       }
 
       if (pOrder->lastVolume <= 0) {

@@ -79,6 +79,8 @@ void testTrader(trading::ContextInt64* pCtx) {
 
   trader.addExchange(exchange);
 
+  trader.initCategoryInfo("pta1601", 0, 0);
+
   trading::StrategyInt64_DSMA* pDSMA = new trading::StrategyInt64_DSMA();
   pDSMA->addExchangeCategory("pta1601");
   pDSMA->setMainCategory("pta1601");
@@ -94,7 +96,7 @@ void testTrader(trading::ContextInt64* pCtx) {
 int main() {
   trading::ContextInt64* pCtx = trading::initInt64();
 
-  testLoadCSV("samplecsv/noformat.csv");
+  // testLoadCSV("samplecsv/noformat.csv");
   testTrader(pCtx);
 
   return 0;
