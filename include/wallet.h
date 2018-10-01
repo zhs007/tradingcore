@@ -34,10 +34,19 @@ class Wallet {
     return totalvalue;
   }
 
+  MoneyType countTotalReturn() {
+    MoneyType totalreturn = 0;
+    for (CategoryMapIter it = m_mapCategory.begin(); it != m_mapCategory.end();
+         ++it) {
+      totalreturn += it->second.countReturn();
+    }
+
+    return totalreturn;
+  }
+
   void setMoney(MoneyType money) { m_money = money; }
 
-  void initCategoryInfo(const char* code, VolumeType vol,
-                        MoneyType avgPrice) {
+  void initCategoryInfo(const char* code, VolumeType vol, MoneyType avgPrice) {
     CategoryPair p;
     p.first = code;
     p.second.code = code;
@@ -60,6 +69,8 @@ class Wallet {
       }
 
       ci.chgVolume(*pCfg, curprice, off);
+      ci.addFee(*pCfg, curprice, off);
+      ci.onChgPrice(*pCfg, curprice);
     }
   }
 

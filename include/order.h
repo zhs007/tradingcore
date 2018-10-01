@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 #include "category.h"
-#include "exchange.h"
+// #include "exchange.h"
 #include "trade.h"
 #include "utils.h"
-#include "wallet.h"
+// #include "wallet.h"
 
 namespace trading {
 

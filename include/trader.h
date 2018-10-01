@@ -98,7 +98,7 @@ class Trader {
         (*it)->onCandle(m_wallet, i);
       }
 
-      MoneyType tv = m_wallet.countTotalValue();
+      MoneyType tv = m_wallet.countTotalReturn();
       printf("%lld \n", tv);
     }
   }

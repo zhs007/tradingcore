@@ -2,6 +2,7 @@
 #define __TRADINGCORE_TRADINGCORE_H__
 
 #include "candle.h"
+#include "context.h"
 #include "csvfile.h"
 #include "exchange.h"
 #include "indicator.h"
@@ -15,7 +16,6 @@
 #include "trader.h"
 #include "utils.h"
 #include "wallet.h"
-#include "context.h"
 
 #include "strategy_dsma.h"
 
@@ -28,6 +28,7 @@ typedef Exchange<int64_t, int64_t, int64_t> ExchangeInt64;
 typedef Indicator<int64_t, int64_t, int64_t> IndicatorInt64;
 typedef IndicatorMgr<int64_t, int64_t, int64_t> IndicatorMgrInt64;
 typedef Context<int64_t, int64_t, int64_t, int64_t> ContextInt64;
+typedef CategoryConfig<int64_t, int64_t> CategoryConfigInt64;
 
 typedef Strategy_DSMA<int64_t, int64_t, int64_t, int64_t> StrategyInt64_DSMA;
 

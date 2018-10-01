@@ -2,7 +2,7 @@
 #define __TRADINGCORE_TRADE_H__
 
 #include <string>
-#include "exchange.h"
+// #include "exchange.h"
 #include "utils.h"
 #include "wallet.h"
 

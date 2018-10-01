@@ -6,7 +6,14 @@
 
 namespace trading {
 
-enum FEE_TYPE { FEE_FREE = 0, FEE_NORMAL, FEE_MIN, FEE_MAX, FEE_MINMAX };
+enum FEE_TYPE {
+  FEE_FREE = 0,
+  FEE_NORMAL,
+  FEE_MIN,
+  FEE_MAX,
+  FEE_MINMAX,
+  FEE_UNITTRADE
+};
 
 template <typename MoneyType, typename VolumeType>
 struct AvgPriceResult {
@@ -26,6 +33,15 @@ struct CategoryConfig {
   VolumeType unit;
   MoneyType price;
 
+  VolumeType unitTrade;
+
+  MoneyType minPriceOff;
+
+  // limie up & down
+  // base unit is 1/1000000
+  int64_t perLimitUp;
+  int64_t perLimitDown;
+
   // deposit
   // base unit is 1/1000000
   int64_t perDeposit;
@@ -37,14 +53,23 @@ struct CategoryConfig {
   int feeTaker;
   MoneyType feeMax;
   MoneyType feeMin;
+  MoneyType feeUnitTrade;
 
   CategoryConfig() {
     unit = 0;
     price = 0;
 
+    unitTrade = 0;
+
+    minPriceOff = 0;
+
+    perLimitUp = 0;
+    perLimitDown = 0;
+
     perDeposit = 0;
 
     setFee(FEE_FREE);
+    feeUnitTrade = 0;
   }
 
   MoneyType countValue(VolumeType vol) const {
@@ -111,6 +136,11 @@ struct CategoryConfig {
 
   void setDeposit(int64_t per) { perDeposit = per; }
 
+  void setFeeUnitTrade(MoneyType fee) {
+    feeType = FEE_UNITTRADE;
+    feeUnitTrade = fee;
+  }
+
   void setFee(FEE_TYPE ft, int fmaker = 0, int ftaker = 0, MoneyType fmin = 0,
               MoneyType fmax = 0) {
     feeType = ft;
@@ -120,7 +150,9 @@ struct CategoryConfig {
     feeMin = fmin;
   }
 
-  MoneyType countFee(MoneyType cost) {
+  MoneyType countFee(MoneyType price, VolumeType off) const {
+    MoneyType cost = price * off;
+
     if (feeType == FEE_NORMAL) {
       return cost * 1000000 / feeTaker;
     } else if (feeType == FEE_MIN) {
@@ -145,12 +177,16 @@ struct CategoryConfig {
       }
 
       return cur;
+    } else if (feeType == FEE_UNITTRADE) {
+      assert(off % unitTrade == 0);
+      VolumeType un = off / unitTrade;
+      return un * feeUnitTrade;
     }
 
     return 0;
   }
 
-  MoneyType countDeposit(MoneyType curprice, VolumeType vol) {
+  MoneyType countDeposit(MoneyType curprice, VolumeType vol) const {
     return countValueEx(curprice, vol) * 1000000 / perDeposit;
   }
 };
@@ -165,6 +201,29 @@ struct CategoryInfo {
   MoneyType avgPrice;
 
   MoneyType curPrice;
+
+  MoneyType feeCost;
+  MoneyType depositCost;
+
+  CategoryInfo() {
+    vol = 0;
+    avgPrice = 0;
+
+    curPrice = 0;
+
+    feeCost = 0;
+    depositCost = 0;
+  }
+
+  void addFee(const CategoryConfigT& cfg, MoneyType price, VolumeType off) {
+    feeCost += cfg.countFee(price, off);
+  }
+
+  void onChgPrice(const CategoryConfigT& cfg, MoneyType price) {
+    curPrice = price;
+
+    depositCost = cfg.countDeposit(price, vol);
+  }
 
   void chgVolume(const CategoryConfigT& cfg, MoneyType price, VolumeType off) {
     AvgPriceResultT ap = cfg.countAvgPriceEx(avgPrice, vol, price, off);
@@ -201,6 +260,10 @@ struct CategoryInfo {
     //       }
     //     }
     //   }
+  }
+
+  MoneyType countReturn() const {
+    return (curPrice - avgPrice) * vol - feeCost;
   }
 };
 

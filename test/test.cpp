@@ -63,7 +63,19 @@ void testTrader(trading::ContextInt64* pCtx) {
   // exchange.getCategoryConfigWithName("pta"), orderlogic);
 
   // exchange.addCategory("pta1601", "pta");
-  exchange.newCategoryConfig("pta1601", 1, 1);
+  // ? fen -> 1 tun
+  trading::CategoryConfigInt64& cfgpta =
+      exchange.newCategoryConfig("pta1601", 1, 1);
+  // 2 yuan
+  cfgpta.minPriceOff = 200;
+  // 0.04
+  cfgpta.perLimitDown = 40000;
+  // 0.04
+  cfgpta.perLimitUp = 40000;
+  // 2 tun
+  cfgpta.unitTrade = 2;
+  // 0.05
+  cfgpta.perDeposit = 50000;
   exchange.addSimExchangeCategory(pCtx->mgrOrder, pCtx->mgrTrade, "pta1601",
                                   "samplecsv/TA601.csv", cfg);
 
