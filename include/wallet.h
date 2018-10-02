@@ -41,7 +41,7 @@ class Wallet {
       totalreturn += it->second.countReturn();
     }
 
-    return totalreturn;
+    return m_money + totalreturn;
   }
 
   void setMoney(MoneyType money) { m_money = money; }
@@ -71,6 +71,10 @@ class Wallet {
       ci.chgVolume(*pCfg, curprice, off);
       ci.addFee(*pCfg, curprice, off);
       ci.onChgPrice(*pCfg, curprice);
+
+      if (ci.vol == 0) {
+        m_money += ci.countReturn();
+      }
     }
   }
 
