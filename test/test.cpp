@@ -26,7 +26,8 @@ void testLoadCSV(const char* filename) {
   cfg.scaleVolume = 100;
   cfg.timeType = trading::CSVTIME_FORMAT_STR;
 
-  bool loadok = trading::loadCSVInt64(lstCandle, filename, cfg);
+  bool loadok =
+      trading::loadCSVInt64(lstCandle, filename, "Asia/Shanghai", cfg);
   if (!loadok) {
     printf("testLoadCSV %s fail.", filename);
 
@@ -39,7 +40,7 @@ void testLoadCSV(const char* filename) {
 
   printf("%s has %d rows", filename, lstCandle.getLength());
 
-  trading::saveCSVInt64(lstCandle, "output.csv", cfg);
+  trading::saveCSVInt64(lstCandle, "output.csv", "Asia/Shanghai", cfg);
 }
 
 void testTrader(trading::ContextInt64* pCtx) {
@@ -77,7 +78,7 @@ void testTrader(trading::ContextInt64* pCtx) {
   // 0.05
   cfgpta.perDeposit = 50000;
   exchange.addSimExchangeCategory(pCtx->mgrOrder, pCtx->mgrTrade, "pta1601",
-                                  "samplecsv/TA601.csv", cfg);
+                                  "samplecsv/TA601.csv", "Asia/Shanghai", cfg);
 
   trading::IndicatorParam param;
   param.avgTime = 10;

@@ -6,8 +6,14 @@
 
 namespace trading {
 
+static char s_defaultTimeZone[128];
+
+void setTimeZone(const char* tz) { strcpy(s_defaultTimeZone, tz); }
+
+const char* getTimeZone() { return s_defaultTimeZone; }
+
 bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
-                  CSVConfig& cfg) {
+                  const char* tz, CSVConfig& cfg) {
   lstCandle.clear();
   CSVFile csv;
   bool loadok = csv.load(filename);
@@ -30,7 +36,7 @@ bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
     const char* strOpenInterest = csv.get(i, cfg.head.openInterest.c_str());
 
     if (cfg.timeType == CSVTIME_FORMAT_STR) {
-      curtime = str2time(strTime);
+      curtime = str2time(strTime, tz);
       // tm curtm;
       // strptime(strTime, "%Y-%m-%d %H:%M:%S", &curtm);
 
@@ -65,7 +71,7 @@ bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
 }
 
 bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
-                  CSVConfig& cfg) {
+                  const char* tz, CSVConfig& cfg) {
   std::ofstream outfile;
   outfile.open(filename, std::ios::out | std::ios::trunc);
 
@@ -82,9 +88,11 @@ bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
     time_t ct = cd.curtime;
 
     if (cfg.timeType == CSVTIME_FORMAT_STR) {
-      tm* curtm = localtime(&ct);
       char buf[128];
-      strftime(buf, 128, "%Y-%m-%d %H:%M:%S", curtm);
+      time2str(buf, 128, ct, tz);
+      // tm* curtm = localtime(&ct);
+      // char buf[128];
+      // strftime(buf, 128, "%Y-%m-%d %H:%M:%S", curtm);
       outfile << buf << ",";
     } else if (cfg.timeType == CSVTIME_TIMESTAMP) {
       outfile << ct << ",";

@@ -93,7 +93,7 @@ class SimExchangeCategory
   }
 
  public:
-  bool loadCandleCSVFile(const char* filename, CSVConfig& cfg) {
+  bool loadCandleCSVFile(const char* filename, const char* tz, CSVConfig& cfg) {
     this->m_lstCandle.clear();
 
     CSVFile csv;
@@ -117,7 +117,7 @@ class SimExchangeCategory
       const char* strOpenInterest = csv.get(i, cfg.head.openInterest.c_str());
 
       if (cfg.timeType == CSVTIME_FORMAT_STR) {
-        curtime = str2time(strTime);
+        curtime = str2time(strTime, tz);
         // printf("%s", strTime);
         // printf("%ld ", curtime);
         // tm curtm;
@@ -298,13 +298,13 @@ class SimExchange : public Exchange<MoneyType, VolumeType, ValueType> {
  public:
   void addSimExchangeCategory(OrderMgrT& mgrOrder, TradeMgrT& mgrTrade,
                               const char* codeCategory, const char* filename,
-                              CSVConfig& cfg) {
+                              const char* tz, CSVConfig& cfg) {
     SimExchangeCategoryT* pSEC = new SimExchangeCategoryT(
         mgrOrder, mgrTrade, codeCategory, this->getCategoryConfig(codeCategory),
         m_orderLogic);
     this->m_mapCategory[codeCategory] = pSEC;
 
-    pSEC->loadCandleCSVFile(filename, cfg);
+    pSEC->loadCandleCSVFile(filename, tz, cfg);
   }
 
   // void start(WalletT& wallet, time_t bt, time_t et, time_t ot) {

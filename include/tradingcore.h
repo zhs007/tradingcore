@@ -41,10 +41,10 @@ ContextInt64* initInt64();
 void releaseInt64(ContextInt64* pCtx);
 
 bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
-                  CSVConfig& cfg);
+                  const char* tz, CSVConfig& cfg);
 
 bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
-                  CSVConfig& cfg);
+                  const char* tz, CSVConfig& cfg);
 
 typedef CandleData<double, double> CandleDataFloat64;
 typedef CandleList<double, double> CandleListFloat64;

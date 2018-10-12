@@ -33,15 +33,22 @@ struct CSVConfig {
 typedef int64_t TradeID;
 typedef int64_t OrderID;
 
-inline time_t str2time(const char* str) {
-  tm tm;
-  strptime(str, "%Y-%m-%d %H:%M:%S", &tm);
-  tm.tm_isdst = -1;
-  return mktime(&tm);
+void setTimeZone(const char* tz);
+
+const char* getTimeZone();
+
+inline time_t str2time(const char* str, const char* tz) {
+  tm ctm;
+  strptime(str, "%Y-%m-%d %H:%M:%S", &ctm);
+  ctm.tm_zone = (char*)tz;
+  ctm.tm_isdst = -1;
+  return mktime(&ctm);
 }
 
-inline void time2str(char* str, int len, time_t t) {
-  tm* curtm = localtime(&t);
+inline void time2str(char* str, int len, time_t t, const char* tz) {
+  tm ctm;
+  ctm.tm_zone = (char*)tz;
+  tm* curtm = localtime_r(&t, &ctm);
   strftime(str, len, "%Y-%m-%d %H:%M:%S", curtm);
 }
 

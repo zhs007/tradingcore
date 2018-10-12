@@ -63,14 +63,14 @@ class Strategy_DSMA
           if (s0 >= 0 && s1 >= 0 && f0 >= 0 && f1 >= 0) {
             if (s0 < f0 && s1 >= f1) {
               char buf[128];
-              time2str(buf, 128, cd->curtime);
+              time2str(buf, 128, cd->curtime, getTimeZone());
 
               pEC->clearOrder(ORDER_SELL);
               pEC->newLimitOrder(wallet, ORDER_BUY, cd->close * 1.1, 100, ct);
               printf("%s do up \n", buf);
             } else if (s0 > f0 && s1 <= f1) {
               char buf[128];
-              time2str(buf, 128, cd->curtime);
+              time2str(buf, 128, cd->curtime, getTimeZone());
 
               pEC->clearOrder(ORDER_BUY);
               pEC->newLimitOrder(wallet, ORDER_SELL, cd->close * 0.9, 100, ct);
