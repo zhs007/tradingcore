@@ -11,7 +11,8 @@ include_directories(./include)
 
 add_subdirectory(src)
 
-add_executable(maintest ./test/test.cpp)
+# add_executable(maintest ./test/test.cpp)
+add_executable(maintest ./test/formatcsv.cpp)
 
 target_link_libraries(maintest libtradingcore)
 

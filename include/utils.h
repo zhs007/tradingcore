@@ -52,6 +52,21 @@ inline void time2str(char* str, int len, time_t t, const char* tz) {
   strftime(str, len, "%Y-%m-%d %H:%M:%S", curtm);
 }
 
+inline void time2tm(tm* curtm, time_t t, const char* tz) {
+  assert(curtm != NULL);
+
+  curtm->tm_zone = (char*)tz;
+  localtime_r(&t, curtm);
+}
+
+inline time_t tm2time(tm* curtm, const char* tz) {
+  assert(curtm != NULL);
+
+  curtm->tm_zone = (char*)tz;
+  curtm->tm_isdst = -1;
+  return mktime(curtm);
+}
+
 // Percent
 
 enum PERCENT_TYPE { PERCENT_TYPE_FIXEDPOINT_MILLION = 0 };

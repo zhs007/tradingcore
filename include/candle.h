@@ -2,6 +2,7 @@
 #define __TRADINGCORE_CANDLE_H__
 
 #include <assert.h>
+#include <functional>
 #include <vector>
 
 namespace trading {
@@ -113,6 +114,7 @@ class CandleList {
   typedef std::vector<CandleDataT> List;
   typedef typename std::vector<CandleDataT>::iterator ListIter;
   typedef typename std::vector<CandleDataT>::const_iterator ListConstIter;
+  typedef std::function<time_t(CandleDataT*, CandleDataT*)> FuncFormatEx;
 
  public:
   CandleList() : m_offTime(60) {}
@@ -206,6 +208,133 @@ class CandleList {
         formatCandle(preit, it);
         preit = it;
         ++it;
+      }
+    }
+
+    return true;
+  }
+
+  // - if ret == cur->curtime, add | overwrite | fill (pre->curtime,
+  // cur->curtime]
+  // - if ret == 0, discard
+  // - if pre == NULL && ret < cur->curtime, fill [ret, cur->curtime]
+  // - if ret > pre->curtime && ret < cur->curtime, fill (pre->curtime, ret] &
+  // set pre = NULL recheck
+  bool formatEx(FuncFormatEx func) {
+    if (m_lst.size() < 2) {
+      return true;
+    }
+    std::sort(m_lst.begin(), m_lst.end());
+    time_t bt = formatTime(m_lst[0].curtime);
+    time_t et = formatTime(m_lst[m_lst.size() - 1].curtime);
+    if (bt >= et) {
+      return false;
+    }
+
+    // time_t ct = bt;
+    CandleDataT* pre = NULL;
+    CandleDataT* realpre = NULL;
+    // ListIter itpre = m_lst.end();
+    for (ListIter it = m_lst.begin(); it != m_lst.end();) {
+      time_t ret = func(pre, &(*it));
+      if (ret == 0) {
+        // discard
+        it = m_lst.erase(it);
+        if (it == m_lst.begin()) {
+          pre = NULL;
+          realpre = NULL;
+        } else {
+          ListIter preit = it - 1;
+          pre = &(*preit);
+          realpre = pre;
+        }
+      } else if (ret == it->curtime) {
+        if (pre != NULL) {
+          if (pre->curtime == ret) {
+            // overwrite
+            pre->mergeEx(*it, true);
+
+            it = m_lst.erase(it);
+            if (it == m_lst.begin()) {
+              pre = NULL;
+              realpre = NULL;
+            } else {
+              ListIter preit = it - 1;
+              pre = &(*preit);
+              realpre = pre;
+            }
+          } else if (pre->curtime == ret - m_offTime) {
+            // add
+            pre = &(*it);
+            realpre = pre;
+            ++it;
+          } else {
+            assert(pre->curtime < ret);
+
+            // fill (pre->curtime, cur->curtime]
+            time_t cct = pre->curtime + m_offTime;
+            do {
+              CandleDataT cd(cct, pre->close, pre->close, pre->close,
+                             pre->close, 0, pre->openInterest);
+              ListIter preit = m_lst.insert(it, cd);
+              it = preit + 1;
+              cct += m_offTime;
+            } while (cct < it->curtime);
+
+            pre = &(*it);
+            realpre = pre;
+            ++it;
+          }
+        } else {
+          // add
+          pre = &(*it);
+          realpre = pre;
+          ++it;
+        }
+      } else if (pre == NULL) {
+        assert(ret < it->curtime);
+
+        // fill [ret, cur->curtime]
+        time_t cct = ret;
+        do {
+          if (realpre == NULL) {
+            CandleDataT cd(cct, it->open, it->open, it->open, it->open, 0,
+                           it->openInterest);
+            ListIter preit = m_lst.insert(it, cd);
+            it = preit + 1;
+            cct += m_offTime;
+          } else {
+            CandleDataT cd(cct, realpre->close, realpre->close, realpre->close,
+                           realpre->close, 0, realpre->openInterest);
+            ListIter preit = m_lst.insert(it, cd);
+            it = preit + 1;
+            cct += m_offTime;
+          }
+        } while (cct < it->curtime);
+
+        pre = &(*it);
+        realpre = pre;
+        ++it;
+      } else {
+        assert(ret >= pre->curtime);
+        assert(ret < it->curtime);
+
+        // fill (pre->curtime, ret]
+        if (ret == pre->curtime) {
+          realpre = pre;
+        } else {
+          time_t cct = pre->curtime + m_offTime;
+          do {
+            CandleDataT cd(cct, pre->close, pre->close, pre->close, pre->close,
+                           0, pre->openInterest);
+            ListIter preit = m_lst.insert(it, cd);
+            realpre = &(*preit);
+            it = preit + 1;
+            cct += m_offTime;
+          } while (cct <= ret);
+        }
+
+        pre = NULL;
       }
     }
 
