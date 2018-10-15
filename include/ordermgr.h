@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "order.h"
 
 namespace trading {
@@ -14,6 +15,8 @@ class OrderMgr {
   typedef std::map<TradeID, OrderT> OrderMap;
   typedef typename OrderMap::iterator OrderMapIter;
   typedef std::pair<TradeID, OrderT> OrderPair;
+  typedef std::vector<OrderT*> OrderList;
+  typedef FuncOrderCmp<MoneyType, VolumeType> FuncOrderCmpT;  
 
  public:
   OrderMgr() : m_curOrderID(0) {}
@@ -42,6 +45,15 @@ class OrderMgr {
     }
 
     return NULL;
+  }
+
+  void buildOrderList(OrderList& lst) {
+    for (OrderMapIter it = m_map.begin(); it != m_map.end(); ++it) {
+      lst.push_back(&(it->second));
+    }
+
+    FuncOrderCmpT func;
+    std::sort(lst.begin(), lst.end(), func);
   }
 
  protected:

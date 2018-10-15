@@ -22,6 +22,8 @@ struct Order {
   typedef CategoryConfig<MoneyType, VolumeType> CategoryConfigT;
   typedef AvgPriceResult<MoneyType, VolumeType> AvgPriceResultT;
 
+  std::string categoryName;
+
   OrderID orderID;
 
   ORDER_TYPE orderType;
@@ -38,7 +40,8 @@ struct Order {
 
   TradeList lstTrade;
 
-  void setLimitOrder(ORDER_SIDE side, MoneyType price, VolumeType volume, time_t t) {
+  void setLimitOrder(ORDER_SIDE side, MoneyType price, VolumeType volume,
+                     time_t t) {
     orderType = ORDER_LIMIT;
     orderSide = side;
     destPrice = price;
@@ -53,7 +56,8 @@ struct Order {
   }
 
   // vol > 0
-  void procTransaction(const CategoryConfigT& cfg, MoneyType price, VolumeType vol) {
+  void procTransaction(const CategoryConfigT& cfg, MoneyType price,
+                       VolumeType vol) {
     assert(vol > 0);
     assert(vol <= lastVolume);
     assert(destVolume >= lastVolume);
@@ -68,13 +72,45 @@ struct Order {
     } else {
       assert(price >= destPrice);
 
-      AvgPriceResultT ap =
-          cfg.countAvgPriceEx(avgPrice, -(destVolume - lastVolume), price, -vol);
+      AvgPriceResultT ap = cfg.countAvgPriceEx(
+          avgPrice, -(destVolume - lastVolume), price, -vol);
       avgPrice = ap.avgPrice;
       lastVolume -= std::abs(ap.lastVolume);
     }
   }
 };
+
+template <typename MoneyType, typename VolumeType>
+struct FuncOrderCmp {
+  typedef Order<MoneyType, VolumeType> OrderT;
+
+  bool operator()(OrderT* pA, OrderT* pB) const {
+    assert(pA != NULL);
+    assert(pB != NULL);
+
+    return pA->bt < pB->bt;
+  }
+};
+
+inline const char* getOrderTypeStr(ORDER_TYPE t) {
+  switch (t) {
+    case ORDER_LIMIT:
+      return "limit";
+  }
+
+  return "unknow";
+}
+
+inline const char* getOrderSideStr(ORDER_SIDE s) {
+  switch (s) {
+    case ORDER_BUY:
+      return "buy";
+    case ORDER_SELL:
+      return "sell";
+  }
+
+  return "unknow";
+}
 
 }  // namespace trading
 

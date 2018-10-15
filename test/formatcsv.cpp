@@ -165,7 +165,7 @@ int main() {
 
   trading::ContextInt64* pCtx = trading::initInt64();
 
-  formatLoadCSV("samplecsv/TA601.csv", "samplecsv/TA601F.csv");
+  formatLoadCSV("samplecsv/TA901.csv", "samplecsv/TA901F.csv");
 
   return 0;
 }

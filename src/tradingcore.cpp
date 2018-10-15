@@ -120,4 +120,89 @@ bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
   return true;
 }
 
+bool saveOrderList2CSVInt64(OrderListInt64& lstOrder, const char* filename,
+                            int scalePrice, int scaleVolume) {
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out | std::ios::trunc);
+
+  outfile << "id,";
+  outfile << "category,";
+  outfile << "ordertype,";
+  outfile << "orderside,";
+  outfile << "createtime,";
+  outfile << "price,";
+  outfile << "volume,";
+  outfile << "avgprice,";
+  outfile << "lastvolume,";
+  outfile << "tradetime";
+  outfile << std::endl;
+
+  for (auto it = lstOrder.begin(); it != lstOrder.end(); ++it) {
+    const OrderInt64& co = **it;
+
+    outfile << co.orderID << ",";
+    outfile << co.categoryName << ",";
+    outfile << getOrderTypeStr(co.orderType) << ",";
+    outfile << getOrderSideStr(co.orderSide) << ",";
+    outfile << co.ct << ",";
+
+    double price = co.destPrice / scalePrice;
+    double volume = co.destVolume / scaleVolume;
+    double avgprice = co.avgPrice / scalePrice;
+    double lastvolume = co.lastVolume / scaleVolume;
+
+    outfile << std::fixed << std::setprecision(2) << price << ",";
+    outfile << std::fixed << std::setprecision(2) << volume << ",";
+    outfile << std::fixed << std::setprecision(2) << avgprice << ",";
+    outfile << std::fixed << std::setprecision(2) << lastvolume << ",";
+
+    outfile << std::fixed << std::setprecision(2) << co.ct << std::endl;
+  }
+
+  outfile.close();
+
+  return true;
+}
+
+bool saveTradeList2CSVInt64(TradeListInt64& lstTrade, const char* filename,
+                            int scalePrice, int scaleVolume) {
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out | std::ios::trunc);
+
+  outfile << "id,";
+  outfile << "category,";
+  outfile << "orderid,";
+  outfile << "side,";
+  outfile << "tradetime,";
+  outfile << "price,";
+  outfile << "volume,";
+  outfile << std::endl;
+
+  for (auto it = lstTrade.begin(); it != lstTrade.end(); ++it) {
+    const TradeInt64& ct = **it;
+
+    outfile << ct.tradeID << ",";
+    outfile << ct.categoryName << ",";
+
+    if (ct.tradeSide == TRADE_BUY) {
+      outfile << ct.buyOrderID << ",";
+    } else {
+      outfile << ct.sellOrderID << ",";
+    }
+
+    outfile << getTradeSideStr(ct.tradeSide) << ",";
+    outfile << ct.ct << ",";
+
+    double price = ct.price / scalePrice;
+    double volume = ct.vol / scaleVolume;
+
+    outfile << std::fixed << std::setprecision(2) << price << ",";
+    outfile << std::fixed << std::setprecision(2) << volume << std::endl;
+  }
+
+  outfile.close();
+
+  return true;
+}
+
 }  // namespace trading

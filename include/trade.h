@@ -30,6 +30,8 @@ struct Trade {
 
   TradeID tradeID;
 
+  std::string categoryName;
+
   // TRADE_TYPE tradeType;
   TRADE_SIDE tradeSide;
 
@@ -44,6 +46,29 @@ struct Trade {
   // TradeSideDetailT buyDetail;
   // TradeSideDetailT sellDetail;
 };
+
+template <typename MoneyType, typename VolumeType>
+struct FuncTradeCmp {
+  typedef Trade<MoneyType, VolumeType> TradeT;
+
+  bool operator()(TradeT* pA, TradeT* pB) const {
+    assert(pA != NULL);
+    assert(pB != NULL);
+
+    return pA->ct < pB->ct;
+  }
+};
+
+inline const char* getTradeSideStr(TRADE_SIDE t) {
+  switch (t) {
+    case TRADE_BUY:
+      return "buy";
+    case TRADE_SELL:
+      return "sell";
+  }
+
+  return "unknow";
+}
 
 }  // namespace trading
 

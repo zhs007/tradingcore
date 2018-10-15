@@ -104,6 +104,14 @@ void testTrader(trading::ContextInt64* pCtx) {
   trader.addStrategy(pDSMA);
 
   trader.startSimTrade();
+
+  trading::OrderListInt64 lstOrder;
+  pCtx->mgrOrder.buildOrderList(lstOrder);
+  trading::saveOrderList2CSVInt64(lstOrder, "samplecsv/order.csv", 100, 100);
+
+  trading::TradeListInt64 lstTrade;
+  pCtx->mgrTrade.buildTradeList(lstTrade);
+  trading::saveTradeList2CSVInt64(lstTrade, "samplecsv/trade.csv", 100, 100);
 }
 
 int main() {

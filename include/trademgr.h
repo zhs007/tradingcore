@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "trade.h"
 
 namespace trading {
@@ -14,6 +15,8 @@ class TradeMgr {
   typedef std::map<TradeID, TradeT> TradeMap;
   typedef typename TradeMap::iterator TradeMapIter;
   typedef std::pair<TradeID, TradeT> TradePair;
+  typedef std::vector<TradeT*> TradeList;
+  typedef FuncTradeCmp<MoneyType, VolumeType> FuncTradeCmpT;
 
  public:
   TradeMgr() : m_curTradeID(0) {}
@@ -42,6 +45,15 @@ class TradeMgr {
     }
 
     return NULL;
+  }
+
+  void buildTradeList(TradeList& lst) {
+    for (TradeMapIter it = m_map.begin(); it != m_map.end(); ++it) {
+      lst.push_back(&(it->second));
+    }
+
+    FuncTradeCmpT func;
+    std::sort(lst.begin(), lst.end(), func);
   }
 
  protected:

@@ -1,6 +1,7 @@
 #ifndef __TRADINGCORE_EXCHANGE_H__
 #define __TRADINGCORE_EXCHANGE_H__
 
+#include <algorithm>
 #include <functional>
 #include <vector>
 #include "candle.h"
@@ -50,6 +51,8 @@ class ExchangeCategory {
   virtual void onCandle(WalletT& wallet, int candleIndex) = 0;
 
   virtual void onNewOrder(WalletT& wallet, OrderT& order, time_t ct) {
+    order.categoryName = m_nameCategory;
+
     if (order.orderSide == ORDER_BUY) {
       _procBuyOrder(wallet, order, ct);
       if (order.lastVolume > 0) {
@@ -73,8 +76,8 @@ class ExchangeCategory {
   //   return pOrder;
   // }
 
-  void newLimitOrder(WalletT& wallet, ORDER_SIDE side, MoneyType price, VolumeType volume,
-                     time_t t) {
+  void newLimitOrder(WalletT& wallet, ORDER_SIDE side, MoneyType price,
+                     VolumeType volume, time_t t) {
     OrderT& order = m_mgrOrder.newOrder();
     order.setLimitOrder(side, price, volume, t);
 
@@ -153,6 +156,20 @@ class ExchangeCategory {
   const CandleDataT* getCandleData(int index) const {
     const CandleDataT& cd = m_lstCandle.get(index);
     return &cd;
+  }
+
+  void _buildOrderList(OrderList& lst) {
+    for (OrderListIter it = m_lstOrderBuy.begin(); it != m_lstOrderBuy.end();
+         ++it) {
+      lst.push_back(*it);
+    }
+
+    for (OrderListIter it = m_lstOrderSell.begin(); it != m_lstOrderSell.end();
+         ++it) {
+      lst.push_back(*it);
+    }
+
+    // std::sort(lst.begin(), lst.end(), FuncOrderCmp);
   }
 
  protected:
@@ -275,6 +292,8 @@ class ExchangeCategory {
   TradeT& _newTrade() { return m_mgrTrade.newTrade(); }
 
   void onTrade(WalletT& wallet, TradeT& trade) {
+    trade.categoryName = m_nameCategory;
+    
     if (trade.tradeSide == TRADE_BUY) {
       wallet.chgCategoryVolume(m_nameCategory.c_str(), trade.price, trade.vol);
     } else {
@@ -311,9 +330,14 @@ class Exchange {
   typedef std::function<void(ExchangeCategoryT&)> FuncForEachECT;
   typedef IndicatorMgr<ValueType, VolumeType, ValueType> IndicatorMgrT;
   typedef MulIndicatorDataMgr<ValueType> MulIndicatorDataMgrT;
+  typedef Order<MoneyType, VolumeType> OrderT;
+  typedef std::vector<OrderT*> OrderList;
+  typedef typename OrderList::iterator OrderListIter;
+  typedef FuncOrderCmp<MoneyType, VolumeType> FuncOrderCmpT;
 
  public:
-  Exchange(CategoryMgrT& mgrCategory, const char* name) : m_mgrCategory(mgrCategory), m_nameExchange(name) {}
+  Exchange(CategoryMgrT& mgrCategory, const char* name)
+      : m_mgrCategory(mgrCategory), m_nameExchange(name) {}
   ~Exchange() {}
 
  public:
@@ -391,6 +415,16 @@ class Exchange {
          it != m_mapCategory.end(); ++it) {
       func(*it->second);
     }
+  }
+
+  void buildOrderList(OrderList& lst) {
+    for (ExchangeCategoryMapIter it = m_mapCategory.begin();
+         it != m_mapCategory.end(); ++it) {
+      (it->second)->_buildOrderList(lst);
+    }
+
+    FuncOrderCmpT func;
+    std::sort(lst.begin(), lst.end(), func);
   }
 
  protected:

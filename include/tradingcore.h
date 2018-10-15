@@ -29,6 +29,10 @@ typedef Indicator<int64_t, int64_t, int64_t> IndicatorInt64;
 typedef IndicatorMgr<int64_t, int64_t, int64_t> IndicatorMgrInt64;
 typedef Context<int64_t, int64_t, int64_t, int64_t> ContextInt64;
 typedef CategoryConfig<int64_t, int64_t> CategoryConfigInt64;
+typedef Trade<int64_t, int64_t> TradeInt64;
+typedef Order<int64_t, int64_t> OrderInt64;
+typedef std::vector<TradeInt64*> TradeListInt64;
+typedef std::vector<OrderInt64*> OrderListInt64;
 
 typedef Strategy_DSMA<int64_t, int64_t, int64_t, int64_t> StrategyInt64_DSMA;
 
@@ -45,6 +49,12 @@ bool loadCSVInt64(CandleListInt64& lstCandle, const char* filename,
 
 bool saveCSVInt64(CandleListInt64& lstCandle, const char* filename,
                   const char* tz, CSVConfig& cfg);
+
+bool saveOrderList2CSVInt64(OrderListInt64& lstOrder, const char* filename,
+                            int scalePrice, int scaleVolume);
+
+bool saveTradeList2CSVInt64(TradeListInt64& lstTrade, const char* filename,
+                            int scalePrice, int scaleVolume);
 
 typedef CandleData<double, double> CandleDataFloat64;
 typedef CandleList<double, double> CandleListFloat64;
