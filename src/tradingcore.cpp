@@ -175,7 +175,7 @@ bool saveTradeList2CSVInt64(TradeListInt64& lstTrade, const char* filename,
   outfile << "side,";
   outfile << "tradetime,";
   outfile << "price,";
-  outfile << "volume,";
+  outfile << "volume";
   outfile << std::endl;
 
   for (auto it = lstTrade.begin(); it != lstTrade.end(); ++it) {
